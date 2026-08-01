@@ -1,0 +1,19 @@
+/* ---- 触发器编辑器 ---- */
+.trigger-cond-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.trigger-cond-head .chip-row {
+  margin-top: 0;
+}
+
+.textarea {
+  height: auto;
+  padding: 8px 10px;
+  line-height: 1.6;
+  resize: vertical;
+}

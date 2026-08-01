@@ -1,0 +1,527 @@
+/* ---- 动画 ---- */
+/*
+ * 主题切换时新图标的换入。
+ *
+ * 整页配色是瞬间翻转的，图标是唯一能承载「刚刚换了」的地方：
+ * 新字形从缩小、旋转的位置收敛到正位，方向与该字形的 hover 动作同向
+ * （太阳顺时针、月亮逆时针），所以按下去的手感是把它转到位。
+ */
+@keyframes theme-icon-swap {
+  from {
+    opacity: 0;
+    transform: rotate(var(--icon-swap-from)) scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+@keyframes overlay-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 浮层挂在按钮右下，从那个角展开，位置来源才看得懂 */
+@keyframes lang-panel-open {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes picker-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/*
+ * 提示条从上方落下、再收回上方。
+ *
+ * 位置从屏幕底部挪到顶栏下沿之后，原来的「从下方升起」就变成了
+ * 从顶栏里钻出来又缩回去 —— 方向必须跟着位置翻过来。
+ * translateX(-50%) 是它的居中方式，每一帧都要带着，否则会甩到右边。
+ */
+@keyframes toast-drop {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* 退场比入场快，并且只收一半距离：它是自动消失的，不需要被看清怎么走的 */
+@keyframes toast-lift {
+  from {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-6px);
+  }
+}
+
+@keyframes card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes panel-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/*
+ * 材料落位反馈。不做回弹：过冲后拉回是回弹族观感，
+ * 换成单向收敛 + 指数衰减，反馈依然明确但更利落。
+ */
+@keyframes slot-pop {
+  from {
+    transform: scale(0.82);
+    opacity: 0.4;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 首帧就是终态，动画只在 React 因 key 变化重挂载时播放一次 */
+.icon-swap {
+  animation: theme-icon-swap 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.icon-swap.icon-day {
+  --icon-swap-from: -60deg;
+}
+
+.icon-swap.icon-night {
+  --icon-swap-from: 30deg;
+}
+
+/*
+ * 视图与步骤切换的转场。
+ *
+ * 三个顶部视图、窄屏三个步骤，切换的都是整块工作区。原本是原地瞬间替换，
+ * 没有交接感；而横向推移在这里又太重——三个视图是并列关系，没有「哪边
+ * 更靠前」，硬给方向反而像界面顿了一下。
+ *
+ * 所以只做交叉溶解：旧帧先撤，新帧从 0.985 收敛到 1。没有位移，
+ * 缩放幅度小到读不出「在动」，只留下「这一屏换过了」。
+ */
+@supports (view-transition-name: none) {
+  .workspace,
+  .workspace-single {
+    view-transition-name: workspace;
+  }
+
+  /*
+   * 默认行为里整页快照（root）还会自己交叉淡入淡出，叠在工作区的推移上
+   * 是两层动画同时跑：顶栏、页签、页脚明明没变，却跟着闪一下。
+   * 这里按住 root，只让工作区动——顶栏与页脚是稳定的框，不参与转场。
+   */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+  }
+
+  /*
+   * 两个视图高度不同时，group 会顺带插值宽高。旧帧撤得比 group 快，
+   * 于是看不到拉伸过程，只看到新帧就位。
+   */
+  ::view-transition-group(workspace) {
+    animation-duration: 240ms;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  ::view-transition-old(workspace),
+  ::view-transition-new(workspace) {
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    transform-origin: center top;
+    /* 高度不同的两个视图交接时，按顶部对齐裁切，避免整体拉伸 */
+    height: 100%;
+    object-fit: none;
+    object-position: top center;
+  }
+
+  /* 旧帧只负责让位，退得快一点，避免和新帧叠着一起亮 */
+  ::view-transition-old(workspace) {
+    animation-name: vt-dissolve-out;
+    animation-duration: 120ms;
+  }
+
+  ::view-transition-new(workspace) {
+    animation-name: vt-dissolve-in;
+    animation-duration: 240ms;
+  }
+}
+
+@keyframes vt-dissolve-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes vt-dissolve-in {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/*
+ * 浮层从触发槽位展开。
+ *
+ * 九个合成槽位外观完全相同，浮层若从屏幕中央淡入，就看不出正在编辑哪一格。
+ * --origin-x / --origin-y 是槽位中心相对视口中心的偏移，由 pickerOrigin.ts 写入：
+ * 起始帧把浮层缩到那个点上，再收敛回居中，来源因此始终可读。
+ * 缩放起点 0.6 而不是更小：小于这个值时浮层内的文字在前几帧会糊成一团。
+ */
+@keyframes picker-from-slot {
+  from {
+    opacity: 0;
+    transform: translate(var(--origin-x, 0), var(--origin-y, 0)) scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+.picker-from-slot {
+  animation: picker-from-slot 240ms cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: center;
+}
+
+/*
+ * 浮层收回来源槽位。
+ *
+ * pickerOrigin.ts 的注释里写的是「浮层从那个点展开，关闭时收回去」——
+ * 展开做了，收回一直没做，关闭是直接卸载。
+ *
+ * 不是完整倒放：回到 scale(0.6) 需要和入场一样的 240ms 才不显得慌，
+ * 而关闭时用户已经做完决定（点了物品或按了 Esc），浮层只需要让开。
+ * 所以只朝来源走 22% 并收到 0.94 —— 方向仍然读得出是回到那一格，
+ * 但 160ms 内就走完。文字在这个幅度里不会糊。
+ */
+@keyframes picker-to-slot {
+  from {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(
+        calc(var(--origin-x, 0px) * 0.22),
+        calc(var(--origin-y, 0px) * 0.22)
+      )
+      scale(0.94);
+  }
+}
+
+/* 没有来源坐标时（键盘触发拿不到位置）只淡出并轻微收拢，不乱给方向 */
+@keyframes picker-sink {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+}
+
+@keyframes overlay-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/*
+ * 关闭时序：浮层 160ms 先收完，幕布 180ms 再撤。
+ * 差这 20ms 才读得出先后 —— 一起消失是「界面被清空」，
+ * 有先后是「浮层走了，幕布跟着撤」。
+ * 时长与 App 里 PICKER_LEAVE_MS 绑定，改一处要改两处。
+ */
+.picker-backdrop.is-leaving {
+  animation: overlay-fade-out 180ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  /* 退场期间浮层还挂着，但已经不该再接收点击 */
+  pointer-events: none;
+}
+
+.picker-backdrop.is-leaving .picker-from-slot {
+  animation: picker-to-slot 160ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.picker-backdrop.is-leaving .picker:not(.picker-from-slot) {
+  animation: picker-sink 160ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* 语言浮层从触发按钮那侧展开，而不是凭空淡入 */
+.lang-panel {
+  animation: lang-panel-open 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: top right;
+}
+
+.picker-backdrop {
+  animation: overlay-fade-in 140ms ease-out;
+}
+
+/* 没有来源坐标时（键盘触发拿不到位置等）退回居中升起 */
+.picker:not(.picker-from-slot) {
+  animation: picker-rise 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.toast {
+  animation: toast-drop 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/*
+ * 退场。原来是计时器一到直接卸载，凭空消失 —— 入场做了退场不做，
+ * 观感是被抽走而不是离开。现在由 App 先挂 is-leaving，
+ * 140ms 后才真正卸载，两个时长必须对齐（改一个要改另一个）。
+ */
+.toast.is-leaving {
+  animation: toast-lift 140ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/*
+ * 工作区的挂载动画。
+ *
+ * 支持 View Transitions 的浏览器里，视图切换已经由 ::view-transition-*
+ * 承担推移，这里再放一次 panel-enter 就是两层动画同时跑（快照在退场、
+ * 新 DOM 又自己升起一遍），观感是抖一下。因此只在不支持转场的浏览器上
+ * 保留这条挂载动画，作为「内容换了」的最低反馈。
+ */
+@supports not (view-transition-name: none) {
+  .workspace {
+    animation: panel-enter 220ms ease-out;
+  }
+}
+
+.pack-card.is-enter,
+.trigger-card.is-enter {
+  animation: card-enter 200ms ease-out;
+}
+
+/* 放入材料时图标收进来，给出明确的落位反馈。曲线与浮层、提示条同族 */
+.slot.is-filled img,
+.gui-slot-icon {
+  animation: slot-pop 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/*
+ * 撤销 / 重做刚恢复的槽位。
+ *
+ * 语汇和右栏的 yaml-line-settle 一致：亮起来，然后自己退掉。它回答的是
+ * 「刚才那一下撤回的是哪几格」，看过就没用了，留着会变成常驻花纹。
+ *
+ * 为什么不能靠 slot-pop 顶替：那条动画挂在 <img> 上，只在 React 重挂图标时
+ * 才播。撤销把物品换成另一个物品时 <img> 还是同一个节点（只换 src），
+ * 撤销把物品清空时 <img> 直接卸载 —— 两种最需要提示的情况它都不响。
+ * 所以标记挂在槽位本身，由 App 算出地址集合后下发。
+ *
+ * 用 inset box-shadow 而不是底色：GUI 贴图上不能覆盖任何半透明填充
+ * （DESIGN.md），内描边是唯一能压在贴图上又不破坏像素观感的表达。
+ * 900ms 比 yaml 行的 1200ms 短一档：槽位在视线正中，不需要那么久。
+ */
+@keyframes slot-restored {
+  0% {
+    box-shadow: inset 0 0 0 2px var(--teal-deep);
+  }
+  45% {
+    box-shadow: inset 0 0 0 2px var(--teal-deep);
+  }
+  100% {
+    box-shadow: inset 0 0 0 2px transparent;
+  }
+}
+
+.slot.is-restored,
+.gui-slot.is-restored {
+  animation: slot-restored 900ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/*
+ * 选中态的内描边优先级更高：正在编辑的那一格不该被这次高亮盖掉。
+ * 放在 is-restored 之后，层叠上压过上面那条。
+ */
+.gui-slot.is-restored.is-active,
+.slot.is-restored.is-active {
+  animation: none;
+}
+
+/*
+ * 这里曾经加过一段「物品清单到货时前 12 条依次铺开」的 stagger，实测后撤掉了。
+ * 留下记录，避免下一个人再走一遍：
+ *
+ * 前提是错的。以为 loading → ready 是「一行提示文字变成几百个图标」，
+ * 但 itemLookup.searchItems 在清单未就绪时回落到 163 条内置物品，
+ * 而空搜索词下 sortResults 按 COMMON_RANK 排序 —— 内置物品正是常用物品，
+ * 两态下都被顶在最前面。实测可见的 120 条里，第一处差异在下标 32。
+ *
+ * 也就是说给前 12 条做入场动画，动的全是没变过的内容。那是装饰，
+ * 不是状态交接（DESIGN.md：不添加与状态无关的装饰动效）。
+ * 改成给 32 之后的条目做也不成立：那些在视口外，而且没有延迟上限可言。
+ */
+
+.gui-slot:active,
+.slot:active {
+  transform: scale(0.96);
+}
+
+.picker-item {
+  transition:
+    background 140ms ease,
+    border-color 140ms ease,
+    transform 140ms ease;
+}
+
+.picker-item:active {
+  transform: scale(0.98);
+}
+
+.type-item {
+  transition:
+    background 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease;
+}
+
+/*
+ * 尊重系统的减少动态偏好：关闭位移与缩放类动画，
+ * 保留颜色过渡，避免界面显得完全无反馈。
+ */
+@media (prefers-reduced-motion: reduce) {
+  .picker-backdrop,
+  .picker,
+  .picker:not(.picker-from-slot),
+  .picker-from-slot,
+  .picker-backdrop.is-leaving,
+  .picker-backdrop.is-leaving .picker-from-slot,
+  .picker-backdrop.is-leaving .picker:not(.picker-from-slot),
+  .toast,
+  /*
+   * .toast.is-leaving 必须单独列出，不能靠上面那条 .toast 覆盖：
+   * 它是两个类（0,2,0），比 .toast（0,1,0）更具体，媒体查询不加权重，
+   * 只写 .toast 的话退场动画在减少动态偏好下照样跑。实测过。
+   */
+  .toast.is-leaving,
+  .tab-history-glyph.is-sweeping,
+  .workspace,
+  .pack-card.is-enter,
+  .trigger-card.is-enter,
+  .slot.is-filled img,
+  .gui-slot-icon,
+  .icon-swap,
+  .item-hover-preview-track.is-scrolling,
+  .lang-panel {
+    animation: none;
+  }
+
+  /*
+   * 退场动画去掉之后，元素必须自己隐掉。
+   *
+   * 上面那条 animation: none 撤掉的是 forwards 填充的终态，
+   * 不撤销「它还挂在 DOM 上」这个事实 —— App 要等计时器到点才卸载。
+   * 不补这两句的话，减少动态偏好下的观感是浮层/提示条在关闭后
+   * 又完整停留一段时间，比没有退场更糟。
+   */
+  .picker-backdrop.is-leaving,
+  .toast.is-leaving {
+    opacity: 0;
+  }
+
+  /*
+   * 撤销恢复了哪几格是信息，不是装饰，所以标记要留下，只是不再有淡出过程。
+   * 与 .yaml-line.is-changed 同一处理：换成常驻内描边，由 JS 到时移除 class。
+   */
+  .slot.is-restored,
+  .gui-slot.is-restored {
+    animation: none;
+    box-shadow: inset 0 0 0 2px var(--teal-deep);
+  }
+
+  .gui-slot.is-restored.is-active,
+  .slot.is-restored.is-active {
+    box-shadow: inset 0 0 0 2px var(--teal-deep);
+  }
+
+  /*
+   * 变更行改成静态底色而不是整条去掉：这是本次编辑落在哪几行的信息，
+   * 不是装饰。动画换成常驻底色，标记仍在（由 JS 到时移除 class），
+   * 只是不再有淡出过程。
+   */
+  .yaml-line.is-changed {
+    animation: none;
+    background: var(--yaml-changed);
+  }
+
+  /* 状态行保留颜色变化本身，去掉过渡时长即可 */
+  .status-line,
+  .status-dot {
+    transition: none;
+  }
+
+  .gui-slot:active,
+  .slot:active,
+  .picker-item:active {
+    transform: none;
+  }
+
+  /*
+   * 图标的旋转与缩放全部去掉：这两个按钮的 hover 还有底色变化，
+   * 去掉字形动作不会失去「可点」的线索。
+   */
+  .icon-day,
+  .icon-night,
+  .icon-language {
+    transition: none;
+  }
+
+  .btn:hover:not(:disabled) .icon-day,
+  .btn:hover:not(:disabled) .icon-night,
+  .btn:hover:not(:disabled) .icon-language,
+  .lang-menu .btn[aria-expanded="true"] .icon-language,
+  .btn-icon:active:not(:disabled) .icon-glyph {
+    transform: none;
+  }
+}

@@ -1,0 +1,123 @@
+/* ---- GUI 贴图工作台 ---- */
+.gui-bench {
+  padding: 4px 0 0;
+}
+
+.gui-stage {
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.gui-texture {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  filter: var(--gui-texture-filter);
+}
+
+/* 贴图已经画出槽位外观，按钮默认透明，只承载交互与状态 */
+.gui-slot {
+  position: absolute;
+  padding: 0;
+  border: none;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  transition:
+    box-shadow 120ms ease,
+    background 120ms ease,
+    transform 120ms ease;
+}
+
+.gui-slot:hover {
+  background: var(--gui-slot-hover);
+  box-shadow: inset 0 0 0 2px var(--teal);
+}
+
+.gui-slot.is-active {
+  background: var(--gui-slot-active);
+  box-shadow: inset 0 0 0 2px var(--teal-deep);
+}
+
+.gui-slot.is-missing {
+  box-shadow: inset 0 0 0 2px var(--missing);
+}
+
+/* 尺寸由 GuiSlotButton 按槽位实际大小注入，父元素 place-items:center 负责居中 */
+.gui-slot-icon {
+  object-fit: contain;
+  display: block;
+}
+
+.gui-slot-text {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  line-height: 1.1;
+  color: var(--text);
+  text-align: center;
+  word-break: break-all;
+  background: var(--slot-text-bg);
+  border-radius: 2px;
+  padding: 1px;
+}
+
+/* right/bottom 由 GuiSlotButton 按图标区域注入 */
+.gui-slot-amount {
+  position: absolute;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  /* 压在贴图上，固定白字黑描边在两种主题下都清晰 */
+  color: #ffffff;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+}
+
+/*
+ * 贴图上存在但配方不涉及的槽位。不加任何填充：覆盖半透明色会破坏贴图本身的
+ * 像素观感，看起来像渲染错误。只保留一个不可点击的热区承载 title 说明。
+ */
+.gui-slot-inert {
+  position: absolute;
+  cursor: help;
+}
+
+.gui-note {
+  margin: 12px 0 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/*
+ * 窄屏的成品槽入口。
+ *
+ * 贴图在 <768px 下按 3 倍整数缩放后 528px 宽，390px 视口里最右边的成品槽
+ * 完全滚出视口（实测 x=389）。贴图不能压（非整数缩放会毁像素画），
+ * 也不能在贴图上盖东西（DESIGN.md 明令禁止），所以在贴图外补一个入口。
+ *
+ * 只在窄屏渲染，宽屏下贴图里那个本来就够得着，多一个反而重复。
+ */
+.gui-result-rail {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.gui-result-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.bench-head-text {
+  min-width: 0;
+}
+
+.bench-station-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}

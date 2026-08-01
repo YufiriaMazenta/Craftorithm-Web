@@ -1,0 +1,59 @@
+/* ---- 左栏：类型导航 ---- */
+/*
+ * 顶栏高度由最高的子元素决定，是 36px 的标识块（不是 34px 的按钮）：
+ * 36 + 上下各 12px 内边距 + 1px 底边 = 61px，再留 6px 呼吸。
+ */
+.type-nav {
+  position: sticky;
+  top: 67px;
+}
+
+.type-group + .type-group {
+  margin-top: 10px;
+}
+
+.type-group-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  padding: 0 4px 4px;
+}
+
+.type-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.type-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 5px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  background: transparent;
+  text-align: left;
+  font-size: 13px;
+}
+
+.type-item:hover {
+  background: var(--surface-sunken);
+}
+
+.type-item[aria-current="true"] {
+  background: var(--teal-wash);
+  border-color: var(--teal);
+  color: var(--teal-deep);
+  font-weight: 500;
+}
+
+.type-item img {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}

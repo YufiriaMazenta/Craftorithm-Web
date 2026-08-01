@@ -1,0 +1,223 @@
+/* ---- 物品选择浮层 ---- */
+.picker-backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--scrim);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  z-index: 50;
+}
+
+.picker {
+  width: min(560px, 100%);
+  max-height: min(620px, 90vh);
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-overlay);
+  overflow: hidden;
+}
+
+.picker-head {
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.picker-head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.picker-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.picker-body {
+  padding: 12px 16px 16px;
+  overflow: auto;
+}
+
+.picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 6px;
+}
+
+.picker-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  background: transparent;
+  text-align: left;
+  min-width: 0;
+}
+
+.picker-item:hover {
+  background: var(--teal-wash);
+  border-color: var(--teal);
+}
+
+.picker-item-icon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 4px;
+  background: var(--surface-sunken);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+  overflow: hidden;
+}
+
+.picker-item-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.picker-item-text {
+  min-width: 0;
+}
+
+.picker-item-name {
+  display: block;
+  font-size: 13px;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.picker-item-id {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.picker-foot {
+  border-top: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.picker-empty {
+  padding: 24px 8px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* 结果分批追加的按钮 */
+.picker-more {
+  display: flex;
+  justify-content: center;
+  padding-top: 10px;
+}
+
+/*
+ * tag / 物品组条目的悬浮预览。跟随指针，坐标由 JS 写在 style 上。
+ * pointer-events: none 必须留着：浮层贴在指针旁边，能接事件就会挡住底下按钮的点击。
+ * z-index 压过 .picker-backdrop 的 50。
+ */
+.item-hover-preview {
+  position: fixed;
+  z-index: 70;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  background: var(--surface-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-overlay);
+}
+
+/* 纯图标堆看不出总数，这行告诉用户是「只有 5 个」还是「还有很多」 */
+.item-hover-preview-count {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/*
+ * 固定宽度的视窗：5 个图标，每个连间距占 36px。
+ * 两端用 mask 渐隐，图标滑进滑出时不会被硬边切掉一半。
+ */
+.item-hover-preview-viewport {
+  /* 不够一屏时贴合内容，够一屏时被 max-width 截到 5 个的宽度 */
+  width: max-content;
+  max-width: 180px;
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 12px, #000 calc(100% - 12px), transparent);
+}
+
+/* 轨道装两份列表，平移 50% 正好等于走完一份，接回起点时画面连续 */
+@keyframes item-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/*
+ * 间距用每个图标的 margin-right，不用 gap：gap 只出现在元素之间，
+ * 两份列表拼起来是 2n-1 道间隙，一半的宽度就比一份列表少半道，
+ * 接回起点时会看到几像素的跳动。margin 让每个图标占满 36px，整除。
+ */
+.item-hover-preview-track {
+  display: flex;
+  width: max-content;
+}
+
+.item-hover-preview-track.is-scrolling {
+  animation: item-marquee var(--marquee-duration) linear infinite;
+  will-change: transform;
+}
+
+.item-hover-preview-icon {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  margin-right: 4px;
+  display: grid;
+  place-items: center;
+  border-radius: 4px;
+  background: var(--surface-sunken);
+  overflow: hidden;
+}
+
+/* 静态展示时末尾不留悬空间距；滚动时轨道被裁掉，这条不影响接缝 */
+.item-hover-preview-track:not(.is-scrolling) .item-hover-preview-icon:last-child {
+  margin-right: 0;
+}
+
+.item-hover-preview-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}

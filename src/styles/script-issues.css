@@ -1,0 +1,220 @@
+/* ---- 校验结果 ---- */
+.script-issues {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.script-issue {
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.script-issue-line {
+  flex-shrink: 0;
+  min-width: 52px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+.script-issue.is-error {
+  color: var(--error);
+}
+.script-issue.is-warning {
+  color: var(--missing);
+}
+.script-issue.is-info {
+  color: var(--text-muted);
+}
+
+/*
+ * 新增区块的窄屏适配。
+ * 放在文件末尾，确保能覆盖上面的基础规则（同优先级下后者生效）。
+ */
+@media (max-width: 767px) {
+  .catalog-status {
+    /* 窄屏没有横向空间，状态提示换到下一行 */
+    margin-left: 0;
+    flex-basis: 100%;
+  }
+
+  .workspace-single {
+    padding: 12px 12px 32px;
+  }
+
+  .pack-card-head,
+  .trigger-card-head {
+    flex-wrap: wrap;
+  }
+
+  /* 触屏没有 hover，删除按钮常驻 */
+  .pack-item-remove {
+    opacity: 1;
+  }
+
+  /*
+   * 触控目标：窄屏下这些都是手指直接点的控件，统一给到 44px（2.5.5）。
+   * 顶栏的 .btn 已经是 34px 且横向空间紧张，这里只抬高度不动宽度。
+   */
+  .picker-tab {
+    height: 44px;
+  }
+
+  /* ---- 切换栏的窄屏适配 ---- */
+  .tab-bar {
+    padding: 0 12px;
+    gap: 4px;
+  }
+
+  .tab {
+    height: 44px;
+  }
+
+  /* 分隔线跟着页签变高居中 */
+  .tab-divider {
+    height: 22px;
+    margin-bottom: 11px;
+  }
+
+  /* 关闭区在触屏上要够大，44px 页签里给到 28px 圆形 */
+  .tab-close {
+    width: 28px;
+    height: 28px;
+    border-radius: 14px;
+    /* 触屏没有 hover，常驻可见 */
+    opacity: 0.8;
+  }
+
+  .tab-title {
+    /* 窄屏横向紧张，名字截短一些，靠横向滚动看全 */
+    max-width: 108px;
+  }
+
+  /*
+   * 新建入口在触屏上是手指直接点的目标，两个分段各要到 44px（2.5.5）。
+   * 高度仍只写在外框上，两个分段 stretch 跟随，所以外框要算上自己的
+   * 上下描边：44 + 1 + 1 = 46px，分段落在 44px。
+   * 写 44px 会让分段只有 42px —— check-narrow.mjs 正是这样抓出来的。
+   */
+  .tab-new {
+    height: 46px;
+  }
+
+  .tab-new-main {
+    width: 48px;
+  }
+
+  /*
+   * 箭头段 32×44。宽度没到 44px 是有意的，与筛选胶囊同一类例外：
+   * 2.5.8 AA 的下限是 24px，32px 已留出余量，而分裂按钮整块若做成
+   * 48+44=92px，在 390px 的栏上会比三个页签还宽，主次就颠倒了。
+   * 主操作（新建配方）那一段是 48×44，完全达标。
+   */
+  .tab-new-more {
+    width: 32px;
+  }
+
+  .tab-menu button {
+    /* 菜单项是手指直接点的目标 */
+    min-height: 44px;
+  }
+
+  /* 语言浮层里的每一项都是手指直接点的目标 */
+  .lang-option {
+    height: 44px;
+  }
+
+  /*
+   * 窄屏下浮层贴视口右沿，不再右对齐到触发按钮。
+   * 320px 时按钮右沿只到 157px，而浮层最小宽 172px，右对齐必然溢出视口左侧，
+   * 语言名开头会被裁掉。
+   *
+   * 做法是把定位基准从 .lang-menu 换成 .topbar（它是 sticky，本身就是定位元素）：
+   * top: 100% 自然落在顶栏下沿，顶栏高度以后怎么变都不用改这里。
+   */
+  .lang-menu {
+    position: static;
+  }
+
+  .lang-panel {
+    top: calc(100% + 4px);
+    right: 8px;
+    max-width: calc(100vw - 16px);
+  }
+
+  /*
+   * 撤销 / 重做在触屏上是唯一入口（没有 Ctrl 键），必须给到 44px。
+   * 两个按钮靠右并排，44px 宽在 320px 下也放得开。
+   */
+  .script-tool {
+    width: 44px;
+    height: 44px;
+  }
+
+  /* 输入与下拉在窄屏也是手指直接点的目标 */
+  .input,
+  .select {
+    height: 44px;
+  }
+
+  /* textarea 高度由内容决定，不能被 44px 覆盖成固定高 */
+  .textarea {
+    height: auto;
+  }
+
+  /*
+   * 脚本编辑器是可拖高的输入区，高度随内容走；
+   * 但初始 2 行只有 37px，低于 2.5.5 的 44px 手指目标，因此给下限。
+   */
+  .script-input,
+  .script-highlight {
+    min-height: 44px;
+  }
+
+  /* 所有常规按钮，不只顶栏：导出行、卡片操作等都是手指目标 */
+  .btn {
+    height: 44px;
+  }
+
+  .btn-icon {
+    width: 44px;
+  }
+
+  /* .btn-sm 出现在浮层头部与卡片内，同样抬到触控目标 */
+  .btn-sm {
+    height: 44px;
+  }
+
+  .type-item {
+    min-height: 44px;
+  }
+
+  .footer-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 2px 10px;
+  }
+
+  /*
+   * 胶囊是成组出现的筛选开关（分类有 9 个，条件类型也是一排）。
+   * 这里取 2.5.8 AA 的 24px 下限再留余量，而不是 2.5.5 的 44px：
+   * 全部抬到 44px 会把浮层里本就有限的结果区挤掉两行。
+   */
+  .chip {
+    height: 32px;
+    border-radius: 16px;
+  }
+
+  /* 窄屏横向放不下版权与 5 个链接，改为上下两行 */
+  .app-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 12px 16px;
+  }
+}

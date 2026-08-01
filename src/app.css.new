@@ -1,0 +1,39 @@
+/*
+ * app.css 的入口：只负责按原顺序引入分区文件。
+ *
+ * @import 顺序等于原 app.css 里的分区顺序，不能重排 —— 有几处选择器
+ * 跨分区重开（例如 .lang-panel 在 language-menu 定义外观、在 animation
+ * 追加 animation），靠后写覆盖前写生效。
+ *
+ * 拆分由 scripts/split-app-css.mjs 生成，一致性由
+ * scripts/verify-css-split.mjs 断言（拼回后必须与原文件逐字节相同）。
+ */
+@import './styles/app-shell.css';
+@import './styles/buttons.css';
+@import './styles/language-menu.css';
+@import './styles/layout.css';
+@import './styles/type-nav.css';
+@import './styles/workbench.css';
+@import './styles/gui-bench.css';
+@import './styles/slots.css';
+@import './styles/fields.css';
+@import './styles/results.css';
+@import './styles/picker.css';
+@import './styles/footer.css';
+@import './styles/toast.css';
+@import './styles/mobile-steps.css';
+@import './styles/responsive.css';
+@import './styles/catalog-status.css';
+@import './styles/tab-bar.css';
+@import './styles/tab-history.css';
+@import './styles/tab-new.css';
+@import './styles/start-screen.css';
+@import './styles/choice-badge.css';
+@import './styles/pack-editor.css';
+@import './styles/trigger-editor.css';
+@import './styles/picker-tabs.css';
+@import './styles/animation.css';
+@import './styles/script-editor.css';
+@import './styles/script-signature.css';
+@import './styles/script-complete.css';
+@import './styles/script-issues.css';

@@ -1,0 +1,127 @@
+/* ---- 应用骨架 ---- */
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+/*
+ * 跳过导航的链接。
+ *
+ * 默认移出视口而不是 display:none——后者会让它彻底拿不到焦点，
+ * 等于没有这个链接。获得焦点时落到顶栏上方可见位置。
+ */
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 60;
+  /* 不用 transform 移出：那样仍占据布局位置，可能挡住顶栏的点击 */
+  transform: translateY(-200%);
+  /*
+   * 12px 上下内边距让实测高度落在 44px 上（10px 时是 42.8px，差 1.2px
+   * 卡在 2.5.5 的门槛下沿）。这是全键盘用户进入工作台的第一站，
+   * 也是触屏用户唯一能跳过 20 个控件的入口，不该差这一点。
+   */
+  padding: 12px 16px;
+  border-radius: var(--radius-control);
+  background: var(--surface-panel);
+  border: 1px solid var(--teal);
+  color: var(--teal-deep);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  box-shadow: var(--shadow-overlay);
+  transition: transform 140ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 24px;
+  background: var(--surface-panel);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+
+/*
+ * 顶栏只有品牌与操作区两块，因此始终是「品牌靠左 + 弹性填充 + 操作靠右」。
+ *
+ * 这里曾经是三列栅格（1fr auto 1fr），因为页签当时排在顶栏中间、需要落在
+ * 顶栏正中线上，而 flex 做不到这件事。页签后来独立成 .tab-bar 之后，
+ * 栅格的中列没了内容、右列空着，操作区反而被 1fr 推到了屏幕中间 ——
+ * 宽屏下越宽偏得越远。删掉栅格，回到 flex + .topbar-spacer。
+ */
+@media (min-width: 1320px) {
+  /* 宽屏下品牌不收缩：标题掉成两行会把顶栏从 61px 撑到 95px，
+     带偏 .type-nav / .inspector 依赖的 67px 偏移 */
+  .topbar .brand {
+    flex-shrink: 0;
+  }
+
+  .brand-title,
+  .brand-sub {
+    white-space: nowrap;
+  }
+}
+
+.brand-mark {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-control);
+  background: linear-gradient(135deg, var(--brand-a), var(--brand-b));
+  padding: 2px;
+  flex-shrink: 0;
+}
+
+.brand-mark img {
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  display: block;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* h1，但在顶栏里只是品牌名，因此清掉默认外边距与字号 */
+.brand-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.brand-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+
+.topbar-spacer {
+  flex: 1;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

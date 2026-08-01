@@ -1,0 +1,104 @@
+/* ---- 字段 ---- */
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.field-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.field-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.input,
+.select {
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-control);
+  background: var(--surface-panel);
+  width: 100%;
+}
+
+.input:focus,
+.select:focus {
+  border-color: var(--teal);
+  outline: none;
+  box-shadow: 0 0 0 2px var(--teal-wash);
+}
+
+.input-mono {
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.section-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 12px 0 10px;
+}
+
+.section-label {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 13px;
+  border: 1px solid var(--border-control);
+  background: var(--surface-panel);
+  font-size: 12px;
+}
+
+.chip[aria-pressed="true"] {
+  border-color: var(--teal);
+  background: var(--teal-wash);
+  color: var(--teal-deep);
+}
+
+/*
+ * 同样是删除操作，给到 24px（2.5.8 AA）。字形本身只有约 9×14px。
+ * 负右边距把多出来的宽度吃回去，胶囊视觉尺寸基本不变。
+ */
+.chip-remove {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin-right: -6px;
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--text-muted);
+}
+
+.chip-remove:hover {
+  color: var(--missing);
+}

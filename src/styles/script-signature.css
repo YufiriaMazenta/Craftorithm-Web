@@ -1,0 +1,38 @@
+/* ---- 参数提示浮窗 ---- */
+/*
+ * 跟着光标走的参数提示，位置由 ScriptEditor 量出后写在 style 上。
+ *
+ * 挂在 .script-editor 上而不是 .script-surface 里：surface 是 overflow: hidden，
+ * 而浮窗要浮到编辑框上沿之外、落在工具栏那条带子上，挂在里面会被裁掉。
+ *
+ * 不设 z-index：它在 DOM 里排在 .script-surface 之后，同为定位元素，
+ * 后者天然画在上面。补全菜单在编辑器下沿外侧，和它不重叠，可以共存。
+ *
+ * 单行平铺不换行：参数填完会一个个走掉，清单本来就在变短；
+ * 真撑不下时右侧省略号截断，也比折成两行盖掉更多代码好。
+ */
+.script-sig-popup {
+  position: absolute;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  padding: 2px 6px;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  background: var(--surface-panel);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-muted);
+  /* 点击穿透回 textarea：浮窗盖着代码时不挡光标定位，
+     贴到右边盖住撤销 / 重做时按钮也还能点 */
+  pointer-events: none;
+}
+
+/* 当前要填的那个参数加重，后面待填的保持 muted */
+.script-sig-param.is-active {
+  font-weight: 600;
+  color: var(--text);
+}

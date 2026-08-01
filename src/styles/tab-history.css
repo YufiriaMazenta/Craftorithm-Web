@@ -1,0 +1,154 @@
+/* ---- 撤销 / 重做 ---- */
+/*
+ * 作用域是整个工作区（换类型、重置、关页签、导入覆盖），因此和「新建」
+ * 一样属于这条栏。必须是可点按钮而不只有快捷键：触屏没有 Ctrl 键。
+ *
+ * margin-left: auto 在这里，把它和后面的新建入口一起推到右端；
+ * .tab-new 原来那句因此不再生效，但留着无害（它现在紧跟本组之后）。
+ */
+.tab-history {
+  display: flex;
+  align-items: stretch;
+  height: 28px;
+  margin-left: auto;
+  align-self: center;
+  flex: none;
+  gap: 2px;
+}
+
+.tab-history-btn {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  align-self: stretch;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    background 160ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.tab-history-btn:hover:not(:disabled) {
+  background: var(--surface-sunken);
+  color: var(--text-strong);
+}
+
+/*
+ * disabled 保留在原位而不隐藏：位置固定的控件才找得到第二次。
+ * 0.4 让它明显退到背景里，但轮廓仍在，用户知道「这里有个撤销，只是现在没得撤」。
+ */
+.tab-history-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/*
+ * 箭头用 CSS 画：为两个字形单独引两个 SVG 不值得，文字按钮在这里太占宽。
+ * 画法是一段圆弧（上半个圆环）加一个箭头头，撤销朝左、重做水平翻转。
+ */
+.tab-history-glyph {
+  position: relative;
+  width: 13px;
+  height: 11px;
+}
+
+.tab-history-glyph::before {
+  /* 弧身：只留上半圈，下半圈被 height 裁掉 */
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 1px;
+  width: 11px;
+  height: 9px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+  transform: rotate(-45deg);
+}
+
+.tab-history-glyph::after {
+  /* 箭头头：两条边组成的折角，落在弧的左端 */
+  content: "";
+  position: absolute;
+  top: 1px;
+  left: 0;
+  width: 5px;
+  height: 5px;
+  border-left: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+}
+
+/*
+ * 重做是同一个字形水平翻转。用变量而不是直接写 transform：
+ * 下面 history-sweep 的关键帧要在保留这次翻转的前提下再叠旋转，
+ * 写死 scaleX(-1) 的话动画会把它覆盖掉，重做键按下去箭头会瞬间翻向。
+ */
+.tab-history-glyph {
+  --glyph-flip: 1;
+  transform: scaleX(var(--glyph-flip));
+}
+
+.tab-history-glyph.is-redo {
+  --glyph-flip: -1;
+}
+
+/*
+ * 按下之后字形沿自己的弧扫一下。
+ *
+ * 撤销是这个工具里唯一「按下去不知道发生了什么」的操作：它可能改的是
+ * 看不见的地方（换类型、关页签、重置），而右栏的 yaml-line-settle 是
+ * 副作用，不是这次按键的回执。这里先由按钮自己确认「这一下生效了」，
+ * 再由被恢复的槽位说明改的是哪里。
+ *
+ * 只有真的撤回了才播：App 里 canUndo 为假时直接 return，不递增计数。
+ * 幅度取 -24deg，方向跟着 --glyph-flip 自动镜像，所以重做是往回扫。
+ */
+/*
+ * 只动 transform 与 opacity，不动颜色。字形是 currentColor 画的，
+ * 而它的静止色随状态变（resting --text-muted，hover --text-strong），
+ * 在关键帧里写死任一个都会在「按完但指针还压着」的 260ms 里闪错颜色。
+ * 淡入 + 扫到位已经足够说明这一下生效了。
+ */
+@keyframes history-sweep {
+  from {
+    opacity: 0.5;
+    transform: scaleX(var(--glyph-flip)) rotate(-28deg);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(var(--glyph-flip)) rotate(0deg);
+  }
+}
+
+/*
+ * 首帧就是终态，动画只在 React 因 key 变化重挂载时播放一次 ——
+ * 与 .icon-swap 同一套做法。不能靠加 class 触发：连按同一个键时
+ * class 没有变化，CSS 不会重播，观感是第二下没反应。
+ * key 挂在字形 span 上而不是按钮上，按钮不重挂载，焦点不会掉。
+ */
+.tab-history-glyph.is-sweeping {
+  animation: history-sweep 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/*
+ * 窄屏抬到 44px。触屏没有 Ctrl 键，按钮是唯一的撤销入口，
+ * 而撤销要在「刚才手滑了」那一刻一次点中，不能将就 32px。
+ *
+ * 这条媒体查询写在这里而不是 responsive 分区：@import 顺序里
+ * tab-history 排在 responsive 之后（顺序不能重排，见 styles/README.md），
+ * 放那边会被这里的 28px 覆盖 —— 实测过，窄屏量出来仍是 30×28。
+ */
+@media (max-width: 767px) {
+  .tab-history {
+    height: 44px;
+  }
+
+  .tab-history-btn {
+    width: 44px;
+  }
+}

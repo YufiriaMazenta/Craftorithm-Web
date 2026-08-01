@@ -1,0 +1,25 @@
+/* ---- 标签 / 物品组徽标 ---- */
+.slot-badge,
+.gui-slot-badge {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  min-width: 13px;
+  height: 13px;
+  padding: 0 3px;
+  border-radius: 3px;
+  background: var(--teal-deep);
+  color: var(--on-accent);
+  font-size: 9px;
+  line-height: 13px;
+  text-align: center;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.slot.is-group,
+.gui-slot.is-group {
+  /* 非具体物品的材料用虚线边框区分 */
+  outline: 1px dashed var(--teal);
+  outline-offset: -2px;
+}

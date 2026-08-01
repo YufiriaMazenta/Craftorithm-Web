@@ -1,0 +1,55 @@
+/* ---- 启动页 ---- */
+.start-screen {
+  display: grid;
+  place-items: center;
+  padding: 48px 16px;
+}
+
+.start-card {
+  max-width: 520px;
+  padding: 28px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-panel);
+  background: var(--surface-panel);
+  box-shadow: var(--shadow-lift);
+  text-align: center;
+}
+
+.start-title {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+
+.start-note {
+  margin: 0 0 20px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.start-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.start-hint {
+  margin: 18px 0 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+/* 物品组与触发器是单栏工作区 */
+.workspace-single {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 980px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.stack-panels {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}

@@ -1,0 +1,230 @@
+/* ---- 切换栏 ---- */
+/*
+ * 工作区唯一的一条切换栏。这里原本是两条（视图页签 + 文件页签），
+ * 但视图已经跟着活动页走，上面那条退化成只读投影，合并掉了。
+ *
+ * 底色关系是这条栏的关键：栏本身用下沉色后退，选中的页签取应用底色 ——
+ * 也就是它正下方工作区的颜色 —— 并盖住栏的底部描边。这样选中页签读起来是
+ * 下方那张纸的前缘，而不是浮在栏上的一个按钮。
+ * 反过来（栏取应用色、页签取面板白）会让页签比页面更亮，隐喻就断了。
+ */
+.tab-bar {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 0 24px;
+  background: var(--surface-sunken);
+  border-bottom: 1px solid var(--border);
+}
+
+/*
+ * 页签多到放不下时横向滚动，而不是折行把这条撑高。
+ *
+ * 滚动条本身不显示：这条栏只有 34px 高，一根 8–12px 的滚动槽会占掉三分之一，
+ * 而且它只在页签溢出时出现 —— 栏的高度会随开页数量跳变。滚动能力照旧，
+ * 改由拖拽与滚轮承担（见 TabBar 的 onWheel / onPointerDown）。
+ *
+ * 顺带修掉了那条「明明没几个页签也冒出来的滚动条」：页签有
+ * margin-bottom: -1px（拿来压住栏的底部描边），所以它的 34px 盒子在这个
+ * 33px 高的容器里纵向溢出 1px —— 量得 scrollHeight 34 / clientHeight 33。
+ * overflow-y: hidden 只是把那 1px 裁掉，容器本身仍是滚动容器，
+ * 于是在 Windows 的传统滚动条下浏览器照样给横向滚动条留出槽位。
+ * 隐掉滚动条之后这一条就不再有可见后果（滚动位置仍被 y 轴钳在 0）。
+ */
+.tab-strip {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  min-width: 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  /* 拖拽时不要选中页签标题文字 */
+  overscroll-behavior-x: contain;
+}
+
+.tab-strip::-webkit-scrollbar {
+  display: none;
+}
+
+/* 拖动中：光标表明这条栏正被拖，并且屏蔽文本选择 */
+.tab-strip.is-dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
+/* 物品组与文件之间的分界：它是常驻的单一配置，不是一份打开的文件 */
+.tab-divider {
+  width: 1px;
+  height: 18px;
+  margin: 0 2px 10px;
+  background: var(--border);
+  flex: none;
+}
+
+/*
+ * 页签本体。position: relative 是为了 ::before 那条顶部指示条。
+ * margin-bottom: -1px 让选中页签压住 .tab-bar 的底部描边——
+ * 页签与工作区连成一张纸靠的就是这 1px。
+ */
+.tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  margin-bottom: -1px;
+  padding: 0 6px 0 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control) var(--radius-control) 0 0;
+  background: transparent;
+  font-size: 13px;
+  color: var(--text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  /* 指数衰减，与全站同一条缓动 */
+  transition:
+    background 160ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.tab:hover {
+  /* 栏已经是下沉色，hover 用应用底色提亮一档，方向与选中态一致 */
+  background: var(--surface-app);
+  color: var(--text);
+}
+
+.tab.is-active {
+  border-color: var(--border);
+  /* 底边与自身同色，等于在栏的描边上开一个口，页签由此连进下方页面 */
+  border-bottom-color: var(--surface-app);
+  background: var(--surface-app);
+  color: var(--text);
+  font-weight: 500;
+}
+
+/*
+ * 选中标记是顶沿一条 2px 状态青绿。
+ * 不用整块青绿底：这条栏上可能同时有 6 个页签，其中一个整块着色会把
+ * 青绿的屏占比推过 10%（The One Teal Rule），而顶沿细条只占几百像素。
+ */
+.tab.is-active::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: var(--teal);
+}
+
+/* 焦点环与全站一致用 --teal-deep，见 styles.css 里那段说明 */
+.tab:focus-visible {
+  outline: 2px solid var(--teal-deep);
+  outline-offset: -2px;
+}
+
+/*
+ * 物品组段：常驻，不可关闭。
+ * 左内边距与文件页签同为 10px（图标起点对齐），右边给 12px ——
+ * 它没有关闭按钮，用不着文件页签那 6px 的收窄。
+ */
+.tab-pinned {
+  padding: 0 12px 0 10px;
+  font: inherit;
+  font-size: 13px;
+}
+
+.tab-count {
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--teal-deep);
+  color: var(--on-accent);
+  font-size: 11px;
+  line-height: 16px;
+  text-align: center;
+  flex: none;
+}
+
+/*
+ * 15px 而不是 13px：量过 13px 下 recipe 图标 89% 的像素落在部分透明上，
+ * 图形整个糊成一团、读起来只是「一张纸」，认不出是工作台。
+ * 也不再压 opacity —— 描线本来就细，再降不透明度等于让它更糊；
+ * 颜色交给 currentColor，未选中页签的字色本身已经是次级灰。
+ */
+.tab-kind {
+  width: 15px;
+  height: 15px;
+  flex: none;
+}
+
+/* 工作站方块图是像素画，缩放时不能插值，否则边缘发虚 */
+.tab-kind-block {
+  image-rendering: pixelated;
+  object-fit: contain;
+}
+
+.tab-title {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tab-close {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.tab-close:hover {
+  background: var(--surface-sunken);
+  opacity: 1;
+}
+
+.tab.is-active .tab-close:hover {
+  /* 选中页签底色是应用色，hover 用下沉色压暗一档才看得出反馈 */
+  background: var(--surface-sunken);
+}
+
+/*
+ * 关闭叉用两条线画，不用文字 ×。
+ * 字形的 × 在不同字体里粗细和视觉重心差别很大，中文字体下还会偏大；
+ * 两条 1px 线在任何字体环境下都一样。
+ */
+.tab-close-glyph {
+  position: relative;
+  width: 9px;
+  height: 9px;
+}
+
+.tab-close-glyph::before,
+.tab-close-glyph::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+}
+
+.tab-close-glyph::before {
+  transform: rotate(45deg);
+}
+
+.tab-close-glyph::after {
+  transform: rotate(-45deg);
+}

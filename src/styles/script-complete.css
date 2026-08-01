@@ -1,0 +1,118 @@
+/* ---- 补全候选 ---- */
+/*
+ * 候选浮层挂在编辑器下沿外侧而不是内部底部：
+ * 放在内部会盖住正在编辑的最后一行代码。
+ */
+.script-complete {
+  position: absolute;
+  left: -1px;
+  right: -1px;
+  top: calc(100% + 2px);
+  z-index: 5;
+  max-height: 260px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface-panel);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 12%);
+}
+
+/* 角标固定列 + 内容列，角标顶对齐，说明换行时不跟着居中 */
+.script-complete-item {
+  display: grid;
+  grid-template-columns: 16px 1fr;
+  align-items: start;
+  gap: 8px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.script-complete-item.is-active {
+  background: var(--teal-wash);
+}
+
+.script-complete-kind {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  background: var(--surface-app);
+  color: var(--text-muted);
+}
+
+.script-complete-kind.is-function {
+  color: var(--se-function);
+}
+.script-complete-kind.is-keyword {
+  color: var(--se-keyword);
+}
+.script-complete-kind.is-module {
+  color: var(--se-module);
+}
+.script-complete-kind.is-variable {
+  color: var(--se-variable);
+}
+
+.script-complete-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.script-complete-line {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+.script-complete-label {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  color: var(--text);
+}
+
+/*
+ * 签名允许折行而不是截断：参数个数与类型是这个面板的主角，
+ * sound(sound: string, [volume: number], [pitch: number]) 被截掉就白做了。
+ */
+.script-complete-sig {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.script-complete-requires {
+  flex-shrink: 0;
+  padding: 0 4px;
+  border-radius: 3px;
+  font-size: 10px;
+  background: var(--surface-app);
+  color: var(--text-muted);
+}
+
+.script-complete-returns {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.script-complete-doc {
+  font-size: 11px;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}

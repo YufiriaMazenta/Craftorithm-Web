@@ -1,0 +1,83 @@
+/* ---- 槽位 ---- */
+.slot {
+  width: var(--slot-size);
+  height: var(--slot-size);
+  /* 槽位是固定方块。作为 flex 子项时不能被旁边的说明文字压窄 */
+  flex-shrink: 0;
+  padding: 4px;
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-panel);
+  background: var(--surface-sunken);
+  display: grid;
+  place-items: center;
+  position: relative;
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease,
+    background 120ms ease,
+    transform 120ms ease;
+}
+
+.slot:hover {
+  border-color: var(--teal);
+  box-shadow: var(--shadow-lift);
+  background: var(--surface-panel);
+}
+
+.slot.is-filled {
+  background: var(--surface-panel);
+}
+
+.slot.is-active {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 2px var(--teal-wash);
+}
+
+.slot.is-missing {
+  border-color: var(--missing);
+  background: var(--missing-wash);
+}
+
+.slot img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.slot-empty-label {
+  /* 11px 是项目的功能文本下限；10px 是全站唯一的例外，没有理由留着 */
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.25;
+  padding: 0 2px;
+  word-break: break-word;
+}
+
+.slot-text {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  line-height: 1.2;
+  color: var(--text);
+  text-align: center;
+  word-break: break-all;
+  padding: 0 2px;
+}
+
+.slot-amount {
+  position: absolute;
+  right: 2px;
+  bottom: 1px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+  text-shadow:
+    0 0 3px var(--amount-halo),
+    0 0 3px var(--amount-halo);
+}
+
+.slot-lg {
+  --slot-size: 68px;
+}

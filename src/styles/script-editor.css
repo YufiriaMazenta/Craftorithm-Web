@@ -1,0 +1,261 @@
+/* ---- 脚本编辑器 ---- */
+/*
+ * 高亮实现方式：透明 textarea 叠在着色 pre 上。
+ * 两层必须用完全相同的字体、字号、行高、padding 与换行规则，
+ * 任何一项不一致都会让光标和着色文字错位。
+ */
+/*
+ * 两层结构：.script-editor 只做定位锚点，不裁剪，让候选浮层能挂到下沿外侧；
+ * .script-surface 承担边框、圆角与裁剪。
+ */
+.script-editor {
+  position: relative;
+}
+
+/*
+ * 撤销 / 重做。
+ *
+ * 快捷键是主路径，这两个按钮是给触屏用的：手机上没有 Ctrl 键，
+ * 没有按钮就完全没法撤销。放在编辑区上沿右侧，不占代码宽度。
+ */
+.script-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  margin-bottom: 4px;
+}
+
+.script-tool {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.script-tool:hover:not(:disabled) {
+  background: var(--surface-sunken);
+  color: var(--text);
+}
+
+.script-tool:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.script-tool:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 1px;
+}
+
+/*
+ * 箭头用内联 SVG 而不是 ↶ ↷ 字形：这两个码位在部分平台字体里缺字，
+ * 会掉成豆腐块。也不用 border 拼，圆弧加箭头尖靠 border 拼出来的
+ * 形状在小尺寸下会糊成一团，看不出方向。
+ */
+.script-tool-icon {
+  display: block;
+  width: 14px;
+  height: 14px;
+  background-color: currentColor;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+/* 逆时针回转箭头 */
+.script-tool-undo {
+  -webkit-mask-image: var(--icon-undo);
+  mask-image: var(--icon-undo);
+}
+
+/* 顺时针，与撤销镜像对称 */
+.script-tool-redo {
+  -webkit-mask-image: var(--icon-redo);
+  mask-image: var(--icon-redo);
+}
+
+.script-surface {
+  position: relative;
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-control);
+  background: var(--se-background);
+  overflow: hidden;
+}
+
+.script-editor:focus-within .script-surface {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 2px var(--teal-wash);
+}
+
+/*
+ * .script-caret-probe 也在这一组里：它是量光标像素位置用的隐藏镜像，
+ * 字体 / 字号 / 行高 / 内边距 / 换行规则任何一项和 textarea 不一致，
+ * 量出来的位置就是错的。所以它必须和这两层共用同一条规则，不能另写一份。
+ */
+.script-highlight,
+.script-input,
+.script-caret-probe {
+  margin: 0;
+  padding: 8px 10px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  tab-size: 2;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  border: none;
+}
+
+.script-caret-probe {
+  position: absolute;
+  inset: 0;
+  /* 只用来量尺寸，不参与显示，也不该被读屏或点到 */
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.script-highlight {
+  overflow: hidden;
+  color: var(--se-plain);
+  pointer-events: none;
+  min-height: 100%;
+}
+
+.script-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  resize: vertical;
+  background: transparent;
+  /* 文字透明，只留光标可见；着色由下层 pre 提供 */
+  color: transparent;
+  caret-color: var(--se-caret);
+  outline: none;
+}
+
+/*
+ * 选区里必须把文字重新画出来。
+ *
+ * textarea 的文字是透明的（着色由下层 pre 提供），而选区高亮由 textarea 自己画，
+ * 盖在 pre 上面。只给 background 不给颜色的话，选中的那段就变成一条纯色块，
+ * 底下的高亮被挡住，什么都看不见。
+ *
+ * 这里把选中文字填回 --se-plain：verify-script-contrast.mjs 一直在断言
+ * plain on selection ≥ 4.5（浅色 10.95、深色 8.21），配色表本来就是按
+ * 「选中时用 plain 色」设计的，之前只是 CSS 没把它画出来。
+ *
+ * 代价：选区内失去语法着色，整段变成 plain 色。选中通常是为了删除或替换，
+ * 这时看清字比保留配色更重要。
+ *
+ * color 和 -webkit-text-fill-color 都要写：基础规则用了 color: transparent，
+ * WebKit / Blink 下 text-fill-color 优先级更高，只改 color 不生效。
+ */
+.script-input::selection {
+  background: var(--se-selection);
+  color: var(--se-plain);
+  -webkit-text-fill-color: var(--se-plain);
+}
+
+.script-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* 语法角色配色，值来自 lib/script/theme.ts */
+.se-plain {
+  color: var(--se-plain);
+}
+.se-comment {
+  color: var(--se-comment);
+  font-style: italic;
+}
+.se-string {
+  color: var(--se-string);
+}
+.se-escape {
+  color: var(--se-escape);
+}
+.se-interp {
+  color: var(--se-interp);
+}
+.se-number {
+  color: var(--se-number);
+}
+.se-boolean {
+  color: var(--se-boolean);
+}
+.se-keyword {
+  color: var(--se-keyword);
+  font-weight: 600;
+}
+.se-function {
+  color: var(--se-function);
+}
+.se-unknownFunction {
+  color: var(--se-unknown-function);
+}
+.se-module {
+  color: var(--se-module);
+}
+.se-variable {
+  color: var(--se-variable);
+}
+.se-operator {
+  color: var(--se-operator);
+}
+.se-punctuation {
+  color: var(--se-punctuation);
+}
+
+.se-bracket-match {
+  outline: 1px solid var(--se-match-bracket);
+  border-radius: 2px;
+}
+
+/*
+ * 波浪线用 repeating-linear-gradient 而不是 text-decoration，
+ * 因为需要独立于文字颜色控制粗细与颜色。
+ */
+.se-underline-error,
+.se-underline-warning,
+.se-underline-info {
+  background-repeat: repeat-x;
+  background-position: 0 100%;
+  background-size: 4px 2px;
+  padding-bottom: 1px;
+}
+
+.se-underline-error {
+  background-image: linear-gradient(
+    to right,
+    var(--se-error-underline) 0 2px,
+    transparent 2px 4px
+  );
+}
+
+.se-underline-warning {
+  background-image: linear-gradient(
+    to right,
+    var(--se-warning-underline) 0 2px,
+    transparent 2px 4px
+  );
+}
+
+.se-underline-info {
+  background-image: linear-gradient(
+    to right,
+    var(--se-info-underline) 0 2px,
+    transparent 2px 4px
+  );
+}

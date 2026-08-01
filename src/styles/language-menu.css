@@ -1,0 +1,75 @@
+/* ---- 语言菜单 ---- */
+.lang-menu {
+  position: relative;
+  display: inline-flex;
+}
+
+/*
+ * 语言数量会继续增长，浮层自己滚动而不是把顶栏顶高。
+ * z-index 要压过 .topbar 的 20，否则会被后面的粘性头部盖住。
+ */
+.lang-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 40;
+  min-width: 172px;
+  max-height: min(60vh, 420px);
+  overflow-y: auto;
+  padding: 4px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-panel);
+  background: var(--surface-panel);
+  box-shadow: var(--shadow-lift);
+}
+
+.lang-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 34px;
+  padding: 0 8px;
+  border: none;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+  text-align: left;
+}
+
+.lang-option:hover {
+  background: var(--surface-sunken);
+}
+
+/* 键盘走位要看得见，浮层里没有别的焦点线索 */
+.lang-option:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: -2px;
+}
+
+/*
+ * 勾选标记留固定宽度的槽，选中与未选中的文字左边缘对齐，
+ * 否则切换语言时整列文字会横向跳动。
+ */
+.lang-check {
+  width: 14px;
+  flex-shrink: 0;
+  color: var(--teal-deep);
+  font-size: 12px;
+  line-height: 1;
+}
+
+.lang-option[aria-checked="true"] {
+  background: var(--teal-wash);
+  color: var(--teal-deep);
+  font-weight: 500;
+}
+
+.lang-option[aria-checked="true"] .lang-check::before {
+  content: "✓";
+}
+
+.lang-label {
+  white-space: nowrap;
+}

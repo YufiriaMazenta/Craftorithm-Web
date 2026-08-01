@@ -1,0 +1,37 @@
+/* ---- 提示条 ---- */
+/*
+ * 落在顶栏与页签栏这个固定框的下沿，而不是屏幕底部。
+ *
+ * 触发它的按钮全在顶栏（导入、导出、复制、重置、撤销），反馈出现在
+ * 屏幕另一端等于要眼睛跑一趟。--toast-top 是「框的高度 + 12px 间隙」：
+ * 桌面顶栏 61 + 页签栏 34，窄屏 65 + 47（tab-history 抬到 44px 撑高了栏）。
+ * 两个值都是实测的，改顶栏或页签栏高度时要跟着量。
+ */
+.toast {
+  position: fixed;
+  left: 50%;
+  top: var(--toast-top, 107px);
+  transform: translateX(-50%);
+  padding: 10px 16px;
+  border-radius: var(--radius-control);
+  background: var(--toast-bg);
+  color: var(--toast-text);
+  font-size: 13px;
+  box-shadow: var(--shadow-overlay);
+  z-index: 60;
+  /*
+   * 它压在工作区上方，但自己没有任何可点内容。不放开命中的话，
+   * 这 2.6 秒里正下方的控件（窄屏的分步页签、面板标题旁的按钮）会被吃掉。
+   */
+  pointer-events: none;
+}
+
+.notice {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-control);
+  background: var(--missing-wash);
+  color: var(--missing);
+  font-size: 12px;
+  line-height: 1.5;
+}

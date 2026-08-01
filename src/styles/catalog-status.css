@@ -1,0 +1,6 @@
+/* ---- 离线提示 ---- */
+.catalog-status {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--missing);
+}

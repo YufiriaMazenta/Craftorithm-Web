@@ -1,0 +1,241 @@
+:root {
+  /*
+   * 品牌渐变的两端，取自标识本身，是固定的品牌承诺，不为对比度让步。
+   * 只出现在顶栏标识与主导出按钮两处；压在上面的文字用 --on-brand。
+   */
+  --brand-a: #28bbb5;
+  --brand-b: #54d4b0;
+
+  /*
+   * 界面强调色与品牌色分开：品牌青绿在浅底上只有 2.4:1，
+   * 无法充当焦点环、边框这类非文字指示（WCAG 1.4.11 要求 3:1），
+   * 也无法承载强调文字（4.5:1）。因此按用途拆成两级，
+   * 同色相压明度，观感仍是同一支青绿。
+   *   --teal      非文字状态：焦点环、边框、状态点、虚线轮廓
+   *   --teal-deep 强调文字，以及需要压白字的实心填充（徽标）
+   */
+  --teal: #219c97;
+  --teal-deep: #177b77;
+  --teal-wash: #e8f7f6;
+  --surface-app: #f7fafa;
+  --surface-panel: #ffffff;
+  --surface-sunken: #f1f6f6;
+  --border: #dce5e5;
+  --border-strong: #c3d2d1;
+  /*
+   * 交互控件的边界。
+   *
+   * 1.4.11 要求「标识控件的视觉信息」不低于 3:1，而 --border-strong 对面板白
+   * 只有 1.56:1——输入框边框是「这里可以输入」的唯一标识，低视力用户看不到
+   * 字段在哪结束。但把 --border-strong 整体压深会让 12 处描边一起变重，
+   * 其中 3 处（语言浮层、补全浮层、页签分隔线）是容器与装饰，本来不需要达标。
+   *
+   * 因此分成两个令牌：这一个给控件边界（输入、按钮、槽位、页签、胶囊），
+   * --border-strong 留给容器与分隔。值取到对三种浅色表面都过 3:1
+   * （白 3.28 / 应用底 3.12 / 下沉面 3.00）。
+   */
+  --border-control: #7e9291;
+  --text: #16302f;
+  --text-muted: #5b7371;
+  --missing: #ad570d;
+  --missing-wash: #fdf3e8;
+  --error: #c0392b;
+  --error-wash: #fbeceb;
+
+  /*
+   * 品牌渐变较亮，压深墨色文字才够对比（白字只有 1.8–2.4:1）。
+   * 深浅主题下渐变都是亮色，因此这个值两个主题一致。
+   */
+  --on-brand: #06201f;
+  /* 实心 --teal-deep 填充上的文字（计数徽标、槽位徽标） */
+  --on-accent: #ffffff;
+  /* 浮层背景遮罩 */
+  --scrim: rgba(22, 48, 47, 0.28);
+  /* 槽位里 ID 文本的底色，用于压住贴图 */
+  --slot-text-bg: rgba(255, 255, 255, 0.82);
+  /* 数量角标的描边，需要与槽位背景反差 */
+  --amount-halo: #ffffff;
+  /* 提示条背景 */
+  --toast-bg: #16302f;
+  --toast-text: #ffffff;
+  /*
+   * YAML 预览里刚变化的那几行的底色。
+   * 用不透明 hex 而不是半透明青绿：这层要压在 --surface-sunken 上，
+   * 定成实色才能直接进 verify-contrast.mjs 的断言表算比例。
+   */
+  --yaml-changed: #ade3db;
+  /* GUI 贴图为浅色，深色主题下整体压暗以免刺眼 */
+  --gui-texture-filter: none;
+  /* 压在 GUI 贴图上的槽位状态色。状态由同时出现的内描边承载，这层只是提示 */
+  --gui-slot-hover: rgba(84, 212, 176, 0.28);
+  --gui-slot-active: rgba(40, 187, 181, 0.22);
+
+  --radius-panel: 8px;
+  --radius-control: 6px;
+  --slot-size: 56px;
+
+  --shadow-overlay: 0 12px 32px rgba(22, 48, 47, 0.16);
+  --shadow-lift: 0 2px 8px rgba(22, 48, 47, 0.08);
+
+  --font-ui: system-ui, -apple-system, 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Courier New', monospace;
+
+  /* 窄屏断点。媒体查询语法不能引用变量，app.css 的 767px 必须与此保持一致。 */
+  --narrow-breakpoint: 767px;
+
+  /*
+   * 顶栏能否容下视图页签的下限。
+   *
+   * 顶栏一行要放品牌、页签、操作三块。量过 11 种语言的自然宽度，
+   * 最长的西语需要 1316px；不够时 flex 会先压缩品牌，标题掉成两行，
+   * 顶栏从 61px 长到 95px，依赖固定偏移的 sticky 列会跟着错位。
+   * 因此取 1320px 作为闸门：够宽才把页签收进顶栏，否则维持独立一行。
+   * 同样地，app.css 里的 1320px 必须与此保持一致。
+   */
+  --topbar-tabs-breakpoint: 1320px;
+
+  /*
+   * 撤销 / 重做图标。
+   *
+   * 内联 data URI 而不是单独的 svg 文件：两个图形各几十字节，
+   * 省两次请求，也不必再往 assets 里塞文件。
+   * 作为 mask 使用，颜色由 background-color 提供，因此 fill 写死黑色。
+   * 注意 data URI 里的 # 必须写成 %23，否则会被当成片段标识符。
+   */
+  --icon-undo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 5.5 4 10l5 4.5v-3.2h5.2a4 4 0 1 1 0 8H8.4v2.4h5.8a6.4 6.4 0 0 0 0-12.8H9V5.5Z'/%3E%3C/svg%3E");
+  --icon-redo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M15 5.5 20 10l-5 4.5v-3.2H9.8a4 4 0 1 0 0 8h5.8v2.4H9.8a6.4 6.4 0 0 1 0-12.8H15V5.5Z'/%3E%3C/svg%3E");
+
+  color-scheme: light;
+}
+
+/*
+ * 深色主题只覆盖颜色令牌，尺寸与字体保持同一套。
+ * data-theme 由 index.html 的内联脚本在首帧前写入。
+ */
+:root[data-theme='dark'] {
+  /* 深色下品牌渐变提亮一档，避免在暗底上显得发灰 */
+  --brand-a: #3fd0c6;
+  --brand-b: #5fdcb8;
+
+  --teal: #3fd0c6;
+  --teal-deep: #7ce3d8;
+  --teal-wash: #16403f;
+  --surface-app: #101817;
+  --surface-panel: #182322;
+  --surface-sunken: #131d1c;
+  --border: #2a3a39;
+  --border-strong: #3b4f4d;
+  /* 深色下同样要过 3:1：面板 3.48 / 应用底 3.89 / 下沉面 3.71 */
+  --border-control: #5e7a78;
+  --text: #e6f0ef;
+  --text-muted: #98aeac;
+  --missing: #e8a75c;
+  --missing-wash: #33261a;
+  --error: #f0857a;
+  --error-wash: #3a1f1d;
+
+  /* 深色下 --teal-deep 是亮青，徽标文字要反过来压深 */
+  --on-accent: #06201f;
+  --scrim: rgba(4, 12, 12, 0.62);
+  --slot-text-bg: rgba(10, 20, 19, 0.82);
+  --amount-halo: #0d1716;
+  --toast-bg: #2a3a39;
+  --toast-text: #e6f0ef;
+  --yaml-changed: #24504d;
+  /* 贴图本身是浅色像素画，稍微压暗才不会在深色界面上过曝 */
+  --gui-texture-filter: brightness(0.82) saturate(0.92);
+  /* 深色下贴图更暗，状态色需要更高不透明度才看得出 */
+  --gui-slot-hover: rgba(95, 220, 184, 0.34);
+  --gui-slot-active: rgba(63, 208, 198, 0.3);
+
+  --shadow-overlay: 0 12px 32px rgba(0, 0, 0, 0.5);
+  --shadow-lift: 0 2px 8px rgba(0, 0, 0, 0.36);
+
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/*
+ * 全局隐去滚动条槽位，滚动能力照旧。
+ *
+ * 这不只是审美：Windows 的传统滚动条会占掉 15px 布局宽度，而 ItemPicker
+ * 打开时把 body 设成 overflow: hidden 锁背景滚动（见 ItemPicker.tsx），
+ * 页面滚动条随之消失 —— 布局视口当场变宽 15px。三栏栅格左列是定宽 240px，
+ * 于是「左栏不动、中栏和右栏整体右移 15px」，关闭时再移回来。配方填到
+ * 七八个材料、页面刚好越过滚动阈值时，每开关一次浮层就抖一次。
+ *
+ * 槽位宽度归零之后，overflow 在 auto / hidden 之间切换不再改变可用宽度，
+ * 抖动从根上消失，也不必给每个滚动容器单独补 scrollbar-gutter。
+ *
+ * 代价是「下面还有内容」少了一个视觉提示。因此配套做了两件事：右栏两张卡片
+ * 改为与中栏等高（见 app.css 的 .inspector），页面本身在桌面宽度下基本不再
+ * 需要滚动；滚轮、触摸、键盘（Tab / 方向键 / PageDown）全部照常工作。
+ *
+ * -webkit- 伪元素留着兜底 Chrome 121 之前不认 scrollbar-width 的版本。
+ */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--surface-app);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+/*
+ * 焦点环用 --teal-deep 而不是 --teal：全键盘操作这个工具要跨 11 个类型、
+ * 9 个槽位和大量字段，焦点位置必须一眼看到。deep 对面板白有 5.1:1，
+ * 高于 1.4.11 的 3:1 下限。
+ */
+:focus-visible {
+  outline: 2px solid var(--teal-deep);
+  outline-offset: 2px;
+}
+
+.pixel {
+  image-rendering: pixelated;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

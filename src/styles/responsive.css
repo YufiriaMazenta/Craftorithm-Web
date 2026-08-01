@@ -1,0 +1,176 @@
+/* ---- 响应式 ---- */
+@media (max-width: 1179px) {
+  .workspace {
+    grid-template-columns: 200px minmax(0, 1fr);
+    padding: 16px 16px 32px;
+  }
+
+  .inspector {
+    grid-column: 1 / -1;
+    position: static;
+  }
+
+  /*
+   * 右栏移到工作台下方后独占一行，没有「另一栏的高度」可对齐，
+   * stretch 拿到的就是自己的内容高度 —— 于是 YAML 会一路长下去。
+   * 这里把桌面让出的那道上限还回来，堆叠布局维持原来的紧凑度。
+   */
+  .yaml-block {
+    flex: none;
+    max-height: 320px;
+    /* 回到按内容变高（上限 320px），因此不能再对外宣告零尺寸 */
+    contain: none;
+  }
+}
+
+@media (max-width: 767px) {
+  /*
+   * 窄屏的框比桌面多一层：顶栏 65 + 页签栏 47 + 分步导航 52 = 164。
+   * 分步导航（类型 / 编辑 / 导出）是窄屏唯一的位置指示，被盖住这 2.6 秒
+   * 用户就看不出自己在哪一步 —— 即使有 pointer-events: none 也一样。
+   * 所以落在 176（164 + 12），与桌面同样的 12px 间隙。
+   * 三个数都是 390px 下实测的，改任一条栏的高度要重新量。
+   */
+  .toast {
+    --toast-top: 176px;
+    /* 360px 下长文案会顶到两边，留出边距并允许换行 */
+    max-width: calc(100vw - 32px);
+  }
+
+  .topbar {
+    padding: 10px 16px;
+    gap: 8px;
+  }
+
+  .brand-sub {
+    display: none;
+  }
+
+  /* 窄屏顶栏：按钮不换行，标题可压缩 */
+  .brand-title {
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .topbar-actions .btn {
+    padding: 0 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .topbar-actions {
+    flex-shrink: 0;
+  }
+
+  .brand {
+    min-width: 0;
+    flex-shrink: 1;
+  }
+
+  .workspace {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 12px 12px 32px;
+  }
+
+  /*
+   * 顶栏高度：最高的控件是语言切换组（44px 按钮 + 上下各 1px 描边 = 46px），
+   * 加上下各 10px 内边距与 1px 底边 = 67px，再留 4px 呼吸。
+   */
+  .step-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 0 12px 8px;
+    background: var(--surface-app);
+    position: sticky;
+    top: 71px;
+    z-index: 15;
+  }
+
+  /* 窄屏的主导航，按 2.5.5 的 44px 触控目标给足高度 */
+  .step-tab {
+    flex: 1;
+    height: 44px;
+    border: 1px solid var(--border-control);
+    border-radius: var(--radius-control);
+    background: var(--surface-panel);
+    font-size: 13px;
+  }
+
+  .step-tab[aria-current="true"] {
+    border-color: var(--teal);
+    background: var(--teal-wash);
+    color: var(--teal-deep);
+    font-weight: 500;
+  }
+
+  /*
+   * 窄屏保持贴图 2 倍整数缩放：非整数缩放会让像素贴图出现不均匀锯齿，
+   * 且槽位会小于触控目标。宽度不够时允许横向滚动而不是继续压缩。
+   */
+  .gui-bench {
+    overflow-x: auto;
+    /* 滚动条留出空间，避免遮住贴图底边 */
+    padding-bottom: 4px;
+  }
+
+  .gui-stage {
+    /*
+     * 176 × 3。3 倍缩放下槽位是 48px，达到触控目标；2 倍只有 32px，太小。
+     * 代价是 390px 视口下需要横向滚动约 160px，只影响这一块区域。
+     */
+    min-width: 528px;
+  }
+
+  .type-nav {
+    position: static;
+  }
+
+  /*
+   * 两处小按钮的触控目标。
+   *
+   * 页签关闭原来是 28×28，脚本编辑器的撤销 / 重做是 26×22。DESIGN.md 给
+   * 「删除类小按钮」开了 24px 的例外，但那条例外要求是可点圆形，且 22px
+   * 的高度连例外都不满足。撤销尤其不能将就 —— 触屏没有 Ctrl 键，
+   * 按钮就是唯一的撤销入口（The Undo Must Be Reachable Rule）。
+   *
+   * 抬到 32px 而不是 44px：它们嵌在页签与工具条内部，44px 会把两条栏
+   * 整体撑高一截。32px 已高于 2.5.8 AA 的 24px 下限，与筛选胶囊同档。
+   */
+  .tab-close {
+    width: 32px;
+    height: 32px;
+  }
+
+  .script-tool {
+    min-width: 32px;
+    min-height: 32px;
+  }
+
+  /* 窄屏改两列，避免整宽单列把 11 个类型拉得过长 */
+  .type-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+  }
+
+  .slot {
+    --slot-size: 48px;
+  }
+
+  .slot-lg {
+    --slot-size: 60px;
+  }
+
+  .picker-backdrop {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .picker {
+    width: 100%;
+    max-height: 88vh;
+    border-radius: var(--radius-panel) var(--radius-panel) 0 0;
+  }
+}

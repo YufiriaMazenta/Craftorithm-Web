@@ -1,0 +1,54 @@
+/* ---- 三栏布局 ---- */
+.workspace {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr) 380px;
+  gap: 16px;
+  /* 底部留白只需与页脚拉开距离，页脚自身还有 10px 内边距 */
+  padding: 12px 24px 16px;
+  align-items: start;
+  /*
+   * 行高按内容算，不吃掉 flex: 1 分到的剩余高度。
+   *
+   * 没有这一条时，栅格行会被拉满整个 .workspace，于是 .inspector 的
+   * align-self: stretch 拿到的是「视口剩余高度」而不是「最高那一栏的高度」——
+   * 切石这类矮配方（中栏 489px）会把右栏拉到 734px，YAML 卡片下半截全是空白。
+   */
+  align-content: start;
+}
+
+/* 让包裹层不占据 grid 位置，直接把内部面板暴露为 grid 子项 */
+.zone {
+  display: contents;
+}
+
+.zone.is-hidden > *,
+.panel.is-hidden {
+  display: none;
+}
+
+.panel {
+  background: var(--surface-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-panel);
+}
+
+.panel-head {
+  padding: 14px 16px 0;
+}
+
+.panel-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.panel-note {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.panel-body {
+  padding: 10px 16px 14px;
+}

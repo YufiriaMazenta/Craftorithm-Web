@@ -1,0 +1,314 @@
+/* ---- 右栏：结果与校验 ---- */
+.inspector {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: sticky;
+  top: 67px;
+  /*
+   * 与同一行里最高的那一栏（通常是中央工作台）等高。
+   *
+   * 原本是内容高度：右栏比中栏高时会把页面撑过滚动阈值，YAML 一长就得
+   * 靠自己那 320px 的内滚动条兜着。等高之后多出来的空间交给 YAML 卡片
+   * （见下面的 .yaml-panel），既不撑长页面，也不必在卡片里再滚一层。
+   *
+   * 配合 .workspace 的 align-content: start —— 少了那一条，这里拿到的
+   * 是视口剩余高度，矮配方会被拉出大片空白。
+   */
+  align-self: stretch;
+  /* 卡片要能压缩到比内容更矮，否则 stretch 拿不到的高度会被内容顶回去 */
+  min-height: 0;
+}
+
+/*
+ * YAML 卡片吃掉右栏与中栏的高度差。
+ *
+ * flex: 1 让它独自伸缩，上面那张「结果与校验」保持内容高度 —— 状态行与
+ * 问题列表是要逐条读的，被拉高只会多出空白；YAML 是块整体，多一点高度
+ * 就多显几行，正好该由它来吸收。
+ */
+.yaml-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.yaml-panel > .panel-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.result-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.result-meta {
+  min-width: 0;
+}
+
+.result-name {
+  font-weight: 600;
+}
+
+.result-id {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+  word-break: break-all;
+}
+
+.status-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  /*
+   * 「需修 2 处 → 可导出」是这个工具最要紧的一次状态翻转。
+   * 颜色瞬间跳变容易被忽略，交接一下让这次翻转被看见。
+   * 只做颜色，不做位移：这行随每次编辑重算，动起来会没完。
+   */
+  transition: color 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: background 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.status-ok .status-dot {
+  background: var(--teal);
+}
+
+.status-ok {
+  color: var(--teal-deep);
+}
+
+.status-bad .status-dot {
+  background: var(--error);
+}
+
+.status-bad {
+  color: var(--error);
+}
+
+/*
+ * 「还需完成 N 项」：拦住导出的全是没填的东西，不是填错的东西。
+ * 用缺失橙加空心点——空心是形状上的差别，不依赖辨色就能和
+ * 实心的成功点、错误点区分开。
+ */
+.status-todo {
+  color: var(--missing);
+}
+
+.status-todo .status-dot {
+  background: none;
+  border: 2px solid var(--missing);
+  /* 描边占掉内部空间，直径补到与实心点视觉等大 */
+  width: 10px;
+  height: 10px;
+}
+.issue-list {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.issue {
+  display: flex;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-control);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.issue-error {
+  background: var(--error-wash);
+  color: var(--error);
+}
+
+.issue-warning {
+  background: var(--missing-wash);
+  color: var(--missing);
+}
+
+/*
+ * 待办条目。红底加 × 是「失败」的视觉语言，用在「还没填」上会让
+ * 空白草稿看起来已经出错；这里退到缺失橙，并且不要底色——
+ * 待办不需要把自己标成一块警示区，它只是还没做完的事。
+ */
+.issue.is-incomplete {
+  background: none;
+  color: var(--missing);
+  /* 没有底色后左侧内边距失去意义，与状态行对齐 */
+  padding: 2px 0;
+}
+
+.yaml-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 14px 16px 0;
+}
+
+.yaml-block {
+  margin: 12px 0 0;
+  padding: 12px;
+  border-radius: var(--radius-control);
+  background: var(--surface-sunken);
+  border: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  /*
+   * 高度由 .yaml-panel 分配，而不是写死 320px 上限。
+   *
+   * 写死上限时，YAML 稍长就在卡片里滚一层，而卡片外面页面还要再滚一层 ——
+   * 两层滚动叠在一起，且内层那 15px 槽位是页面越过滚动阈值的最后一根稻草。
+   * 现在跟着右栏一起长到与中栏等高，常见长度（十几行）一屏放得下。
+   *
+   * min-height 兜住矮配方：中栏只有 300 多像素时，这块不该被压到看不见行。
+   * overflow: auto 留着 —— 超长 YAML 仍然要能滚，只是槽位已被全局隐去。
+   *
+   * contain: size 是这里的关键一条。栅格行高取各栏的内容高度，没有它时
+   * YAML 的文本高度会算进右栏的内容高度，行高被右栏顶起来 —— 十六行 YAML
+   * 就让右栏 657px 反超中栏 596px，等高失败，页面也跟着变长。加上之后
+   * 这块对外宣告尺寸为零，行高只由中栏（与左栏）决定，它再反过来吃掉
+   * 分给自己的空间。代价是它不能再按内容自动变高，而这正是我们要的。
+   */
+  flex: 1;
+  min-height: 120px;
+  contain: size;
+  overflow: auto;
+}
+
+/*
+ * 刚变化的行。
+ *
+ * 底色亮起后自行退掉，而不是留在界面上：它回答的是「我刚才那一下改到了哪」，
+ * 看过就没用了，留着会变成永久的花纹。1.2s 与 useChangedLines 的清除时间一致。
+ * 只用底色不加左边框：等宽文本的行首缩进本身就是 YAML 的结构信息，
+ * 加一条竖线会让人误读成层级。
+ */
+.yaml-line {
+  border-radius: 3px;
+  /* 底色紧贴文字，行与行之间不糊成一片 */
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.yaml-line.is-changed {
+  animation: yaml-line-settle 1200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes yaml-line-settle {
+  0% {
+    background: var(--yaml-changed);
+  }
+  /* 前 45% 保持满色，看得见；之后退到透明，与 JS 清除标记同时到底 */
+  45% {
+    background: var(--yaml-changed);
+  }
+  100% {
+    background: transparent;
+  }
+}
+
+.export-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/*
+ * 导出后的「下一步」。
+ *
+ * 工具的终点是文件落盘，用户的终点是配方在服务器上生效，中间隔着
+ * 「搬进插件目录 → reload → 确认生效」。这块把那三步写出来。
+ *
+ * 是常驻卡片不是 toast：用户要照着它搬文件，读完还得能回头看。
+ *
+ * 边界只用 1px 描边，与其它面板一致（DESIGN.md：面板由描边定义边界）。
+ * 这里不加彩色左轨：那是「警告条」的语法，而这块的语气是事情办成了。
+ * 「成功」这层意思由 --teal-wash 的浅青底表达，面积很小，
+ * One Teal Rule 的 10% 上限不受影响。
+ */
+.next-steps {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--teal);
+  border-radius: var(--radius-panel);
+  background: var(--teal-wash);
+}
+
+.next-steps-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.next-steps-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.next-steps-close {
+  flex: none;
+}
+
+.next-steps-list {
+  margin: 10px 0 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.next-steps-step {
+  display: block;
+}
+
+/*
+ * 路径与命令是要照着敲或粘贴的字符串，所以用等宽体 —— 这是
+ * DESIGN.md 允许等宽的场景（真正的标识符），不是拿它当「技术感」装饰。
+ */
+.next-steps-path {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.next-steps-path code {
+  padding: 2px 6px;
+  border-radius: 4px;
+  /* 卡片底已经是浅青，代码块用面板白往上提一层才分得开 */
+  background: var(--surface-panel);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  /* 长路径在窄屏要能断行，否则撑出横向滚动条 */
+  word-break: break-all;
+}

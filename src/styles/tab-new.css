@@ -1,0 +1,164 @@
+/* ---- 新建入口（分裂按钮） ---- */
+/*
+ * 主键直接新建配方，箭头展开其余项。
+ * 两个并排的文字按钮在这条栏上有 176px 宽，比页签本身还抢眼，
+ * 而「新建配方」是这里唯一的高频动作，值得一键到位。
+ */
+/*
+ * 高度写在外框这一处，两个分段用 stretch 跟随（见下面那段说明）。
+ * 28px = 分段 26px + 自己的上下描边各 1px，分段高度与改动前一致。
+ *
+ * align-self: center 取代原来的 margin-bottom: 5px —— 那个值是按 34px
+ * 页签手算的，页签一变高（窄屏 44px）就得跟着改；居中让它自己对齐。
+ *
+ * 推到右端的 margin-left: auto 移到了前面的 .tab-history 上：现在是
+ * 「撤销 / 重做 + 新建」这一组整体靠右，两者之间不该被 auto 撑开。
+ */
+.tab-new {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  height: 28px;
+  align-self: center;
+  flex: none;
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-control);
+  background: var(--surface-panel);
+  /*
+   * 这里不能用 overflow: hidden 去裁圆角：菜单浮层是这个元素的绝对定位子元素，
+   * 会被一起裁掉（量过：浮层在 DOM 里、位置也对，但完全不可见）。
+   * 改成让两个分段自己带圆角。
+   */
+}
+
+.tab-new-main {
+  border-radius: calc(var(--radius-control) - 1px) 0 0 calc(var(--radius-control) - 1px);
+}
+
+.tab-new-more {
+  border-radius: 0 calc(var(--radius-control) - 1px) calc(var(--radius-control) - 1px) 0;
+}
+
+/*
+ * 两个分段不写死高度：由 .tab-new 的 align-items: stretch 撑满整个外框，
+ * 字形再用 place-items: center 落在各自分段的正中。
+ * 之前写的是 height: 26px —— 那既让分段短于外框（stretch 被固定高度顶掉，
+ * 留下两条 1px 的死带），也让「按钮的可点区域」小于看起来的边框范围。
+ * 现在外框高度由 .tab-new 一处定义，两段自动跟随。
+ */
+.tab-new-main,
+.tab-new-more {
+  display: grid;
+  place-items: center;
+  align-self: stretch;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    background 160ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.tab-new-main {
+  width: 30px;
+}
+
+.tab-new-more {
+  width: 20px;
+  border-left: 1px solid var(--border-control);
+}
+
+.tab-new-main:hover,
+.tab-new-more:hover,
+.tab-new-more[aria-expanded="true"] {
+  background: var(--teal-wash);
+  color: var(--teal-deep);
+}
+
+.tab-new-main:focus-visible,
+.tab-new-more:focus-visible {
+  outline: 2px solid var(--teal-deep);
+  outline-offset: -2px;
+}
+
+/* 加号同样用两条线画，理由同 .tab-close-glyph */
+.tab-new-glyph {
+  position: relative;
+  width: 11px;
+  height: 11px;
+}
+
+.tab-new-glyph::before,
+.tab-new-glyph::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1.5px;
+  border-radius: 1px;
+  background: currentColor;
+}
+
+.tab-new-glyph::after {
+  transform: rotate(90deg);
+}
+
+.tab-new-caret {
+  width: 0;
+  height: 0;
+  border-left: 3.5px solid transparent;
+  border-right: 3.5px solid transparent;
+  border-top: 4px solid currentColor;
+}
+
+.tab-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 60;
+  min-width: 180px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-panel);
+  background: var(--surface-panel);
+  box-shadow: var(--shadow-overlay);
+  display: flex;
+  flex-direction: column;
+}
+
+.tab-menu button {
+  padding: 7px 10px;
+  border: none;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.tab-menu button:hover:not(:disabled) {
+  background: var(--teal-wash);
+  color: var(--teal-deep);
+}
+
+.tab-menu button:disabled {
+  color: var(--text-muted);
+  opacity: 0.5;
+  cursor: default;
+}
+
+.tab-menu button:focus-visible {
+  outline: 2px solid var(--teal-deep);
+  outline-offset: -2px;
+}
+
+.tab-menu-sep {
+  height: 1px;
+  margin: 4px 6px;
+  background: var(--border);
+}

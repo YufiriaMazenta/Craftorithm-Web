@@ -1,0 +1,3596 @@
+/* ---- 应用骨架 ---- */
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+/*
+ * 跳过导航的链接。
+ *
+ * 默认移出视口而不是 display:none——后者会让它彻底拿不到焦点，
+ * 等于没有这个链接。获得焦点时落到顶栏上方可见位置。
+ */
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 60;
+  /* 不用 transform 移出：那样仍占据布局位置，可能挡住顶栏的点击 */
+  transform: translateY(-200%);
+  /*
+   * 12px 上下内边距让实测高度落在 44px 上（10px 时是 42.8px，差 1.2px
+   * 卡在 2.5.5 的门槛下沿）。这是全键盘用户进入工作台的第一站，
+   * 也是触屏用户唯一能跳过 20 个控件的入口，不该差这一点。
+   */
+  padding: 12px 16px;
+  border-radius: var(--radius-control);
+  background: var(--surface-panel);
+  border: 1px solid var(--teal);
+  color: var(--teal-deep);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  box-shadow: var(--shadow-overlay);
+  transition: transform 140ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 24px;
+  background: var(--surface-panel);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+
+/*
+ * 顶栏只有品牌与操作区两块，因此始终是「品牌靠左 + 弹性填充 + 操作靠右」。
+ *
+ * 这里曾经是三列栅格（1fr auto 1fr），因为页签当时排在顶栏中间、需要落在
+ * 顶栏正中线上，而 flex 做不到这件事。页签后来独立成 .tab-bar 之后，
+ * 栅格的中列没了内容、右列空着，操作区反而被 1fr 推到了屏幕中间 ——
+ * 宽屏下越宽偏得越远。删掉栅格，回到 flex + .topbar-spacer。
+ */
+@media (min-width: 1320px) {
+  /* 宽屏下品牌不收缩：标题掉成两行会把顶栏从 61px 撑到 95px，
+     带偏 .type-nav / .inspector 依赖的 67px 偏移 */
+  .topbar .brand {
+    flex-shrink: 0;
+  }
+
+  .brand-title,
+  .brand-sub {
+    white-space: nowrap;
+  }
+}
+
+.brand-mark {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-control);
+  background: linear-gradient(135deg, var(--brand-a), var(--brand-b));
+  padding: 2px;
+  flex-shrink: 0;
+}
+
+.brand-mark img {
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  display: block;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* h1，但在顶栏里只是品牌名，因此清掉默认外边距与字号 */
+.brand-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.brand-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+
+.topbar-spacer {
+  flex: 1;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ---- 按钮 ---- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--border-control);
+  background: var(--surface-panel);
+  font-size: 13px;
+  font-weight: 500;
+  transition:
+    background 120ms ease,
+    border-color 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.btn:hover:not(:disabled) {
+  border-color: var(--teal);
+  color: var(--teal-deep);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/*
+ * 主操作保留品牌渐变原色，文字改用深墨：白字压在这条亮渐变上只有 1.8–2.4:1，
+ * 而「下载 YAML」是本工具的终点动作，必须读得清。
+ */
+.btn-primary {
+  border: none;
+  color: var(--on-brand);
+  background: linear-gradient(135deg, var(--brand-a), var(--brand-b));
+}
+
+.btn-primary:hover:not(:disabled) {
+  color: var(--on-brand);
+  box-shadow: var(--shadow-lift);
+}
+
+.btn-quiet {
+  border-color: transparent;
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.btn-quiet:hover:not(:disabled) {
+  background: var(--surface-sunken);
+  color: var(--text);
+}
+
+.btn-sm {
+  height: 28px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+/* 顶栏的图标按钮：正方形，只放一个字形 */
+.btn-icon {
+  width: 34px;
+  padding: 0;
+  justify-content: center;
+  font-size: 15px;
+}
+
+/*
+ * 主题与语言两个图标按钮不要描边：它们是常驻的环境开关，
+ * 不是本页的操作项，静止和 hover 都只用底色变化表达可点。
+ * 焦点环仍由 :focus-visible 提供，键盘可见性不受影响。
+ */
+.btn-quiet.btn-icon,
+.btn-quiet.btn-icon:hover:not(:disabled) {
+  border-color: transparent;
+}
+
+/*
+ * 顶栏图标。
+ *
+ * assets 里的 SVG 是写死的黑色填充，直接 <img> 在深色主题下看不见。
+ * 用 mask 把图形当遮罩、底色取 currentColor，图标就跟着按钮文字色走，
+ * 两套主题都不用另做一份文件。
+ */
+/*
+ * mask-size 是按图定的，不是一个通用值：每个 SVG 的图形占画布的比例不同，
+ * 统一倍数会让留白多的图偏小、铺满的图糊出边界。
+ * 换算是 mask-size = 目标字形边长 ÷ 字形盒 ÷ 图形占画布的比例。
+ *
+ * 顶栏这三个的目标是 18.5px。字形盒 32px（34px 按钮减去 1px 描边×2），
+ * 图形占 800×800 画布的 52.5%（实测 getBBox，作者留的空白）：
+ *   18.5 ÷ 32 ÷ 0.525 ≈ 1.10 → 110%
+ * 也就是约占按钮的 54%，与旁边 13px 文字按钮的视重齐平。
+ *
+ * 之前是 170%（字形 28.6px、占按钮 84%）—— 那个值来自「字形占字形盒 85%」
+ * 的设定，但字形盒本身就撑满了按钮内容区，两层 85% 叠起来等于让图标几乎
+ * 顶到按钮边缘，在文字按钮旁边明显大一号。
+ * 换图或裁掉留白后要重新量 getBBox 并改这里。
+ */
+.icon-glyph {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-color: currentColor;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: var(--icon-mask-size, 110%);
+  mask-size: var(--icon-mask-size, 110%);
+}
+
+.icon-day {
+  -webkit-mask-image: url("../assets/icons/day.svg");
+  mask-image: url("../assets/icons/day.svg");
+}
+
+.icon-night {
+  -webkit-mask-image: url("../assets/icons/night.svg");
+  mask-image: url("../assets/icons/night.svg");
+}
+
+.icon-language {
+  -webkit-mask-image: url("../assets/icons/language.svg");
+  mask-image: url("../assets/icons/language.svg");
+}
+
+/*
+ * 页签图标。这两个图的图形几乎铺满 1024×1024 画布（实测 0.908 / 0.825），
+ * 所以补偿倍数比上面那组小得多。字形盒是 15px（见 .tab-kind），
+ * 目标字形约 12.75px（占字形盒 85%），各自按 0.85 ÷ 实测占比 算：
+ *   item_pack 0.85 ÷ 0.908 ≈ 94%
+ *   trigger   0.85 ÷ 0.825 ≈ 103%
+ *
+ * 原先还有一个 .icon-recipe（recipe.svg）。配方页签改用该类型的工作站
+ * 方块图之后它就没有引用了，资源也已删除 —— 留着会让 Vite 打包时
+ * 因为解析不到 url() 而报错。
+ */
+.icon-item-pack {
+  --icon-mask-size: 94%;
+  -webkit-mask-image: url("../assets/icons/item_pack.svg");
+  mask-image: url("../assets/icons/item_pack.svg");
+}
+
+.icon-trigger {
+  --icon-mask-size: 103%;
+  -webkit-mask-image: url("../assets/icons/trigger.svg");
+  mask-image: url("../assets/icons/trigger.svg");
+}
+
+/*
+ * 图标的 hover 动作。
+ *
+ * 这两个按钮没了描边，hover 时除了底色再没有别的反馈，
+ * 因此让字形本身动一下：光标压上去时图形是活的，说明可点。
+ * 三个字形各按自己的形状选动作，不套同一条通用 hover：
+ *   太阳 8 向对称，转 45° 正好落回自身，转完仍是一个正的太阳；
+ *   月亮只倾斜 -18°，缺口朝向变了但仍读得出是月亮；
+ *   语言图标是「文 / A」两个字符，任何旋转都会让字歪掉，只放大。
+ */
+.icon-day,
+.icon-night,
+.icon-language {
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.btn:hover:not(:disabled) .icon-day {
+  transform: rotate(45deg);
+}
+
+.btn:hover:not(:disabled) .icon-night {
+  transform: rotate(-18deg) scale(1.06);
+}
+
+.btn:hover:not(:disabled) .icon-language {
+  transform: scale(1.1);
+}
+
+/* 语言浮层展开时图标保持放大，图标与浮层是同一个状态 */
+.lang-menu .btn[aria-expanded="true"] .icon-language {
+  transform: scale(1.1);
+}
+
+/* 按下时字形收一下，动作发生在按钮内部，不需要整块位移。放在最后，压过上面两条 hover */
+.btn-icon:active:not(:disabled) .icon-glyph {
+  transform: scale(0.9);
+  transition-duration: 90ms;
+}
+
+/* ---- 语言菜单 ---- */
+.lang-menu {
+  position: relative;
+  display: inline-flex;
+}
+
+/*
+ * 语言数量会继续增长，浮层自己滚动而不是把顶栏顶高。
+ * z-index 要压过 .topbar 的 20，否则会被后面的粘性头部盖住。
+ */
+.lang-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 40;
+  min-width: 172px;
+  max-height: min(60vh, 420px);
+  overflow-y: auto;
+  padding: 4px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-panel);
+  background: var(--surface-panel);
+  box-shadow: var(--shadow-lift);
+}
+
+.lang-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 34px;
+  padding: 0 8px;
+  border: none;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+  text-align: left;
+}
+
+.lang-option:hover {
+  background: var(--surface-sunken);
+}
+
+/* 键盘走位要看得见，浮层里没有别的焦点线索 */
+.lang-option:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: -2px;
+}
+
+/*
+ * 勾选标记留固定宽度的槽，选中与未选中的文字左边缘对齐，
+ * 否则切换语言时整列文字会横向跳动。
+ */
+.lang-check {
+  width: 14px;
+  flex-shrink: 0;
+  color: var(--teal-deep);
+  font-size: 12px;
+  line-height: 1;
+}
+
+.lang-option[aria-checked="true"] {
+  background: var(--teal-wash);
+  color: var(--teal-deep);
+  font-weight: 500;
+}
+
+.lang-option[aria-checked="true"] .lang-check::before {
+  content: "✓";
+}
+
+.lang-label {
+  white-space: nowrap;
+}
+/* ---- 三栏布局 ---- */
+.workspace {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr) 380px;
+  gap: 16px;
+  /* 底部留白只需与页脚拉开距离，页脚自身还有 10px 内边距 */
+  padding: 12px 24px 16px;
+  align-items: start;
+  /*
+   * 行高按内容算，不吃掉 flex: 1 分到的剩余高度。
+   *
+   * 没有这一条时，栅格行会被拉满整个 .workspace，于是 .inspector 的
+   * align-self: stretch 拿到的是「视口剩余高度」而不是「最高那一栏的高度」——
+   * 切石这类矮配方（中栏 489px）会把右栏拉到 734px，YAML 卡片下半截全是空白。
+   */
+  align-content: start;
+}
+
+/* 让包裹层不占据 grid 位置，直接把内部面板暴露为 grid 子项 */
+.zone {
+  display: contents;
+}
+
+.zone.is-hidden > *,
+.panel.is-hidden {
+  display: none;
+}
+
+.panel {
+  background: var(--surface-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-panel);
+}
+
+.panel-head {
+  padding: 14px 16px 0;
+}
+
+.panel-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.panel-note {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.panel-body {
+  padding: 10px 16px 14px;
+}
+
+/* ---- 左栏：类型导航 ---- */
+/*
+ * 顶栏高度由最高的子元素决定，是 36px 的标识块（不是 34px 的按钮）：
+ * 36 + 上下各 12px 内边距 + 1px 底边 = 61px，再留 6px 呼吸。
+ */
+.type-nav {
+  position: sticky;
+  top: 67px;
+}
+
+.type-group + .type-group {
+  margin-top: 10px;
+}
+
+.type-group-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  padding: 0 4px 4px;
+}
+
+.type-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.type-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 5px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  background: transparent;
+  text-align: left;
+  font-size: 13px;
+}
+
+.type-item:hover {
+  background: var(--surface-sunken);
+}
+
+.type-item[aria-current="true"] {
+  background: var(--teal-wash);
+  border-color: var(--teal);
+  color: var(--teal-deep);
+  font-weight: 500;
+}
+
+.type-item img {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* ---- 中央工作台 ---- */
+.bench-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px 0;
+}
+
+.bench-station {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+
+/* ---- GUI 贴图工作台 ---- */
+.gui-bench {
+  padding: 4px 0 0;
+}
+
+.gui-stage {
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.gui-texture {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  filter: var(--gui-texture-filter);
+}
+
+/* 贴图已经画出槽位外观，按钮默认透明，只承载交互与状态 */
+.gui-slot {
+  position: absolute;
+  padding: 0;
+  border: none;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  transition:
+    box-shadow 120ms ease,
+    background 120ms ease,
+    transform 120ms ease;
+}
+
+.gui-slot:hover {
+  background: var(--gui-slot-hover);
+  box-shadow: inset 0 0 0 2px var(--teal);
+}
+
+.gui-slot.is-active {
+  background: var(--gui-slot-active);
+  box-shadow: inset 0 0 0 2px var(--teal-deep);
+}
+
+.gui-slot.is-missing {
+  box-shadow: inset 0 0 0 2px var(--missing);
+}
+
+/* 尺寸由 GuiSlotButton 按槽位实际大小注入，父元素 place-items:center 负责居中 */
+.gui-slot-icon {
+  object-fit: contain;
+  display: block;
+}
+
+.gui-slot-text {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  line-height: 1.1;
+  color: var(--text);
+  text-align: center;
+  word-break: break-all;
+  background: var(--slot-text-bg);
+  border-radius: 2px;
+  padding: 1px;
+}
+
+/* right/bottom 由 GuiSlotButton 按图标区域注入 */
+.gui-slot-amount {
+  position: absolute;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  /* 压在贴图上，固定白字黑描边在两种主题下都清晰 */
+  color: #ffffff;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+}
+
+/*
+ * 贴图上存在但配方不涉及的槽位。不加任何填充：覆盖半透明色会破坏贴图本身的
+ * 像素观感，看起来像渲染错误。只保留一个不可点击的热区承载 title 说明。
+ */
+.gui-slot-inert {
+  position: absolute;
+  cursor: help;
+}
+
+.gui-note {
+  margin: 12px 0 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/*
+ * 窄屏的成品槽入口。
+ *
+ * 贴图在 <768px 下按 3 倍整数缩放后 528px 宽，390px 视口里最右边的成品槽
+ * 完全滚出视口（实测 x=389）。贴图不能压（非整数缩放会毁像素画），
+ * 也不能在贴图上盖东西（DESIGN.md 明令禁止），所以在贴图外补一个入口。
+ *
+ * 只在窄屏渲染，宽屏下贴图里那个本来就够得着，多一个反而重复。
+ */
+.gui-result-rail {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.gui-result-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.bench-head-text {
+  min-width: 0;
+}
+
+.bench-station-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ---- 槽位 ---- */
+.slot {
+  width: var(--slot-size);
+  height: var(--slot-size);
+  /* 槽位是固定方块。作为 flex 子项时不能被旁边的说明文字压窄 */
+  flex-shrink: 0;
+  padding: 4px;
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-panel);
+  background: var(--surface-sunken);
+  display: grid;
+  place-items: center;
+  position: relative;
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease,
+    background 120ms ease,
+    transform 120ms ease;
+}
+
+.slot:hover {
+  border-color: var(--teal);
+  box-shadow: var(--shadow-lift);
+  background: var(--surface-panel);
+}
+
+.slot.is-filled {
+  background: var(--surface-panel);
+}
+
+.slot.is-active {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 2px var(--teal-wash);
+}
+
+.slot.is-missing {
+  border-color: var(--missing);
+  background: var(--missing-wash);
+}
+
+.slot img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.slot-empty-label {
+  /* 11px 是项目的功能文本下限；10px 是全站唯一的例外，没有理由留着 */
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.25;
+  padding: 0 2px;
+  word-break: break-word;
+}
+
+.slot-text {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  line-height: 1.2;
+  color: var(--text);
+  text-align: center;
+  word-break: break-all;
+  padding: 0 2px;
+}
+
+.slot-amount {
+  position: absolute;
+  right: 2px;
+  bottom: 1px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+  text-shadow:
+    0 0 3px var(--amount-halo),
+    0 0 3px var(--amount-halo);
+}
+
+.slot-lg {
+  --slot-size: 68px;
+}
+
+/* ---- 字段 ---- */
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.field-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.field-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.input,
+.select {
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-control);
+  background: var(--surface-panel);
+  width: 100%;
+}
+
+.input:focus,
+.select:focus {
+  border-color: var(--teal);
+  outline: none;
+  box-shadow: 0 0 0 2px var(--teal-wash);
+}
+
+.input-mono {
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.section-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 12px 0 10px;
+}
+
+.section-label {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 13px;
+  border: 1px solid var(--border-control);
+  background: var(--surface-panel);
+  font-size: 12px;
+}
+
+.chip[aria-pressed="true"] {
+  border-color: var(--teal);
+  background: var(--teal-wash);
+  color: var(--teal-deep);
+}
+
+/*
+ * 同样是删除操作，给到 24px（2.5.8 AA）。字形本身只有约 9×14px。
+ * 负右边距把多出来的宽度吃回去，胶囊视觉尺寸基本不变。
+ */
+.chip-remove {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin-right: -6px;
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--text-muted);
+}
+
+.chip-remove:hover {
+  color: var(--missing);
+}
+
+/* ---- 右栏：结果与校验 ---- */
+.inspector {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: sticky;
+  top: 67px;
+  /*
+   * 与同一行里最高的那一栏（通常是中央工作台）等高。
+   *
+   * 原本是内容高度：右栏比中栏高时会把页面撑过滚动阈值，YAML 一长就得
+   * 靠自己那 320px 的内滚动条兜着。等高之后多出来的空间交给 YAML 卡片
+   * （见下面的 .yaml-panel），既不撑长页面，也不必在卡片里再滚一层。
+   *
+   * 配合 .workspace 的 align-content: start —— 少了那一条，这里拿到的
+   * 是视口剩余高度，矮配方会被拉出大片空白。
+   */
+  align-self: stretch;
+  /* 卡片要能压缩到比内容更矮，否则 stretch 拿不到的高度会被内容顶回去 */
+  min-height: 0;
+}
+
+/*
+ * YAML 卡片吃掉右栏与中栏的高度差。
+ *
+ * flex: 1 让它独自伸缩，上面那张「结果与校验」保持内容高度 —— 状态行与
+ * 问题列表是要逐条读的，被拉高只会多出空白；YAML 是块整体，多一点高度
+ * 就多显几行，正好该由它来吸收。
+ */
+.yaml-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.yaml-panel > .panel-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.result-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.result-meta {
+  min-width: 0;
+}
+
+.result-name {
+  font-weight: 600;
+}
+
+.result-id {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+  word-break: break-all;
+}
+
+.status-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  /*
+   * 「需修 2 处 → 可导出」是这个工具最要紧的一次状态翻转。
+   * 颜色瞬间跳变容易被忽略，交接一下让这次翻转被看见。
+   * 只做颜色，不做位移：这行随每次编辑重算，动起来会没完。
+   */
+  transition: color 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: background 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.status-ok .status-dot {
+  background: var(--teal);
+}
+
+.status-ok {
+  color: var(--teal-deep);
+}
+
+.status-bad .status-dot {
+  background: var(--error);
+}
+
+.status-bad {
+  color: var(--error);
+}
+
+/*
+ * 「还需完成 N 项」：拦住导出的全是没填的东西，不是填错的东西。
+ * 用缺失橙加空心点——空心是形状上的差别，不依赖辨色就能和
+ * 实心的成功点、错误点区分开。
+ */
+.status-todo {
+  color: var(--missing);
+}
+
+.status-todo .status-dot {
+  background: none;
+  border: 2px solid var(--missing);
+  /* 描边占掉内部空间，直径补到与实心点视觉等大 */
+  width: 10px;
+  height: 10px;
+}
+.issue-list {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.issue {
+  display: flex;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-control);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.issue-error {
+  background: var(--error-wash);
+  color: var(--error);
+}
+
+.issue-warning {
+  background: var(--missing-wash);
+  color: var(--missing);
+}
+
+/*
+ * 待办条目。红底加 × 是「失败」的视觉语言，用在「还没填」上会让
+ * 空白草稿看起来已经出错；这里退到缺失橙，并且不要底色——
+ * 待办不需要把自己标成一块警示区，它只是还没做完的事。
+ */
+.issue.is-incomplete {
+  background: none;
+  color: var(--missing);
+  /* 没有底色后左侧内边距失去意义，与状态行对齐 */
+  padding: 2px 0;
+}
+
+.yaml-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 14px 16px 0;
+}
+
+.yaml-block {
+  margin: 12px 0 0;
+  padding: 12px;
+  border-radius: var(--radius-control);
+  background: var(--surface-sunken);
+  border: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  /*
+   * 高度由 .yaml-panel 分配，而不是写死 320px 上限。
+   *
+   * 写死上限时，YAML 稍长就在卡片里滚一层，而卡片外面页面还要再滚一层 ——
+   * 两层滚动叠在一起，且内层那 15px 槽位是页面越过滚动阈值的最后一根稻草。
+   * 现在跟着右栏一起长到与中栏等高，常见长度（十几行）一屏放得下。
+   *
+   * min-height 兜住矮配方：中栏只有 300 多像素时，这块不该被压到看不见行。
+   * overflow: auto 留着 —— 超长 YAML 仍然要能滚，只是槽位已被全局隐去。
+   *
+   * contain: size 是这里的关键一条。栅格行高取各栏的内容高度，没有它时
+   * YAML 的文本高度会算进右栏的内容高度，行高被右栏顶起来 —— 十六行 YAML
+   * 就让右栏 657px 反超中栏 596px，等高失败，页面也跟着变长。加上之后
+   * 这块对外宣告尺寸为零，行高只由中栏（与左栏）决定，它再反过来吃掉
+   * 分给自己的空间。代价是它不能再按内容自动变高，而这正是我们要的。
+   */
+  flex: 1;
+  min-height: 120px;
+  contain: size;
+  overflow: auto;
+}
+
+/*
+ * 刚变化的行。
+ *
+ * 底色亮起后自行退掉，而不是留在界面上：它回答的是「我刚才那一下改到了哪」，
+ * 看过就没用了，留着会变成永久的花纹。1.2s 与 useChangedLines 的清除时间一致。
+ * 只用底色不加左边框：等宽文本的行首缩进本身就是 YAML 的结构信息，
+ * 加一条竖线会让人误读成层级。
+ */
+.yaml-line {
+  border-radius: 3px;
+  /* 底色紧贴文字，行与行之间不糊成一片 */
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.yaml-line.is-changed {
+  animation: yaml-line-settle 1200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes yaml-line-settle {
+  0% {
+    background: var(--yaml-changed);
+  }
+  /* 前 45% 保持满色，看得见；之后退到透明，与 JS 清除标记同时到底 */
+  45% {
+    background: var(--yaml-changed);
+  }
+  100% {
+    background: transparent;
+  }
+}
+
+.export-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/*
+ * 导出后的「下一步」。
+ *
+ * 工具的终点是文件落盘，用户的终点是配方在服务器上生效，中间隔着
+ * 「搬进插件目录 → reload → 确认生效」。这块把那三步写出来。
+ *
+ * 是常驻卡片不是 toast：用户要照着它搬文件，读完还得能回头看。
+ *
+ * 边界只用 1px 描边，与其它面板一致（DESIGN.md：面板由描边定义边界）。
+ * 这里不加彩色左轨：那是「警告条」的语法，而这块的语气是事情办成了。
+ * 「成功」这层意思由 --teal-wash 的浅青底表达，面积很小，
+ * One Teal Rule 的 10% 上限不受影响。
+ */
+.next-steps {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--teal);
+  border-radius: var(--radius-panel);
+  background: var(--teal-wash);
+}
+
+.next-steps-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.next-steps-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.next-steps-close {
+  flex: none;
+}
+
+.next-steps-list {
+  margin: 10px 0 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.next-steps-step {
+  display: block;
+}
+
+/*
+ * 路径与命令是要照着敲或粘贴的字符串，所以用等宽体 —— 这是
+ * DESIGN.md 允许等宽的场景（真正的标识符），不是拿它当「技术感」装饰。
+ */
+.next-steps-path {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.next-steps-path code {
+  padding: 2px 6px;
+  border-radius: 4px;
+  /* 卡片底已经是浅青，代码块用面板白往上提一层才分得开 */
+  background: var(--surface-panel);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  /* 长路径在窄屏要能断行，否则撑出横向滚动条 */
+  word-break: break-all;
+}
+
+/* ---- 物品选择浮层 ---- */
+.picker-backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--scrim);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  z-index: 50;
+}
+
+.picker {
+  width: min(560px, 100%);
+  max-height: min(620px, 90vh);
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-overlay);
+  overflow: hidden;
+}
+
+.picker-head {
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.picker-head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.picker-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.picker-body {
+  padding: 12px 16px 16px;
+  overflow: auto;
+}
+
+.picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 6px;
+}
+
+.picker-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  background: transparent;
+  text-align: left;
+  min-width: 0;
+}
+
+.picker-item:hover {
+  background: var(--teal-wash);
+  border-color: var(--teal);
+}
+
+.picker-item-icon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 4px;
+  background: var(--surface-sunken);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+  overflow: hidden;
+}
+
+.picker-item-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.picker-item-text {
+  min-width: 0;
+}
+
+.picker-item-name {
+  display: block;
+  font-size: 13px;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.picker-item-id {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.picker-foot {
+  border-top: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.picker-empty {
+  padding: 24px 8px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* 结果分批追加的按钮 */
+.picker-more {
+  display: flex;
+  justify-content: center;
+  padding-top: 10px;
+}
+
+/*
+ * tag / 物品组条目的悬浮预览。跟随指针，坐标由 JS 写在 style 上。
+ * pointer-events: none 必须留着：浮层贴在指针旁边，能接事件就会挡住底下按钮的点击。
+ * z-index 压过 .picker-backdrop 的 50。
+ */
+.item-hover-preview {
+  position: fixed;
+  z-index: 70;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  background: var(--surface-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-overlay);
+}
+
+/* 纯图标堆看不出总数，这行告诉用户是「只有 5 个」还是「还有很多」 */
+.item-hover-preview-count {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/*
+ * 固定宽度的视窗：5 个图标，每个连间距占 36px。
+ * 两端用 mask 渐隐，图标滑进滑出时不会被硬边切掉一半。
+ */
+.item-hover-preview-viewport {
+  /* 不够一屏时贴合内容，够一屏时被 max-width 截到 5 个的宽度 */
+  width: max-content;
+  max-width: 180px;
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 12px, #000 calc(100% - 12px), transparent);
+}
+
+/* 轨道装两份列表，平移 50% 正好等于走完一份，接回起点时画面连续 */
+@keyframes item-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/*
+ * 间距用每个图标的 margin-right，不用 gap：gap 只出现在元素之间，
+ * 两份列表拼起来是 2n-1 道间隙，一半的宽度就比一份列表少半道，
+ * 接回起点时会看到几像素的跳动。margin 让每个图标占满 36px，整除。
+ */
+.item-hover-preview-track {
+  display: flex;
+  width: max-content;
+}
+
+.item-hover-preview-track.is-scrolling {
+  animation: item-marquee var(--marquee-duration) linear infinite;
+  will-change: transform;
+}
+
+.item-hover-preview-icon {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  margin-right: 4px;
+  display: grid;
+  place-items: center;
+  border-radius: 4px;
+  background: var(--surface-sunken);
+  overflow: hidden;
+}
+
+/* 静态展示时末尾不留悬空间距；滚动时轨道被裁掉，这条不影响接缝 */
+.item-hover-preview-track:not(.is-scrolling) .item-hover-preview-icon:last-child {
+  margin-right: 0;
+}
+
+.item-hover-preview-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+/* ---- 页脚 ---- */
+/* margin-top:auto 把页脚压到底：.app 是纵向 flex 且 min-height:100% */
+.app-footer {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding: 10px 24px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-panel);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+}
+
+.footer-link {
+  padding: 2px 6px;
+  border-radius: var(--radius-control);
+  color: var(--text-muted);
+  text-decoration: none;
+  transition:
+    background 140ms ease,
+    color 140ms ease;
+}
+
+.footer-link:hover {
+  background: var(--surface-sunken);
+  color: var(--teal-deep);
+}
+
+/* ---- 提示条 ---- */
+/*
+ * 落在顶栏与页签栏这个固定框的下沿，而不是屏幕底部。
+ *
+ * 触发它的按钮全在顶栏（导入、导出、复制、重置、撤销），反馈出现在
+ * 屏幕另一端等于要眼睛跑一趟。--toast-top 是「框的高度 + 12px 间隙」：
+ * 桌面顶栏 61 + 页签栏 34，窄屏 65 + 47（tab-history 抬到 44px 撑高了栏）。
+ * 两个值都是实测的，改顶栏或页签栏高度时要跟着量。
+ */
+.toast {
+  position: fixed;
+  left: 50%;
+  top: var(--toast-top, 107px);
+  transform: translateX(-50%);
+  padding: 10px 16px;
+  border-radius: var(--radius-control);
+  background: var(--toast-bg);
+  color: var(--toast-text);
+  font-size: 13px;
+  box-shadow: var(--shadow-overlay);
+  z-index: 60;
+  /*
+   * 它压在工作区上方，但自己没有任何可点内容。不放开命中的话，
+   * 这 2.6 秒里正下方的控件（窄屏的分步页签、面板标题旁的按钮）会被吃掉。
+   */
+  pointer-events: none;
+}
+
+.notice {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-control);
+  background: var(--missing-wash);
+  color: var(--missing);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* ---- 移动端分步导航 ---- */
+.step-tabs {
+  display: none;
+}
+
+/* ---- 响应式 ---- */
+@media (max-width: 1179px) {
+  .workspace {
+    grid-template-columns: 200px minmax(0, 1fr);
+    padding: 16px 16px 32px;
+  }
+
+  .inspector {
+    grid-column: 1 / -1;
+    position: static;
+  }
+
+  /*
+   * 右栏移到工作台下方后独占一行，没有「另一栏的高度」可对齐，
+   * stretch 拿到的就是自己的内容高度 —— 于是 YAML 会一路长下去。
+   * 这里把桌面让出的那道上限还回来，堆叠布局维持原来的紧凑度。
+   */
+  .yaml-block {
+    flex: none;
+    max-height: 320px;
+    /* 回到按内容变高（上限 320px），因此不能再对外宣告零尺寸 */
+    contain: none;
+  }
+}
+
+@media (max-width: 767px) {
+  /*
+   * 窄屏的框比桌面多一层：顶栏 65 + 页签栏 47 + 分步导航 52 = 164。
+   * 分步导航（类型 / 编辑 / 导出）是窄屏唯一的位置指示，被盖住这 2.6 秒
+   * 用户就看不出自己在哪一步 —— 即使有 pointer-events: none 也一样。
+   * 所以落在 176（164 + 12），与桌面同样的 12px 间隙。
+   * 三个数都是 390px 下实测的，改任一条栏的高度要重新量。
+   */
+  .toast {
+    --toast-top: 176px;
+    /* 360px 下长文案会顶到两边，留出边距并允许换行 */
+    max-width: calc(100vw - 32px);
+  }
+
+  .topbar {
+    padding: 10px 16px;
+    gap: 8px;
+  }
+
+  .brand-sub {
+    display: none;
+  }
+
+  /* 窄屏顶栏：按钮不换行，标题可压缩 */
+  .brand-title {
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .topbar-actions .btn {
+    padding: 0 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .topbar-actions {
+    flex-shrink: 0;
+  }
+
+  .brand {
+    min-width: 0;
+    flex-shrink: 1;
+  }
+
+  .workspace {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 12px 12px 32px;
+  }
+
+  /*
+   * 顶栏高度：最高的控件是语言切换组（44px 按钮 + 上下各 1px 描边 = 46px），
+   * 加上下各 10px 内边距与 1px 底边 = 67px，再留 4px 呼吸。
+   */
+  .step-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 0 12px 8px;
+    background: var(--surface-app);
+    position: sticky;
+    top: 71px;
+    z-index: 15;
+  }
+
+  /* 窄屏的主导航，按 2.5.5 的 44px 触控目标给足高度 */
+  .step-tab {
+    flex: 1;
+    height: 44px;
+    border: 1px solid var(--border-control);
+    border-radius: var(--radius-control);
+    background: var(--surface-panel);
+    font-size: 13px;
+  }
+
+  .step-tab[aria-current="true"] {
+    border-color: var(--teal);
+    background: var(--teal-wash);
+    color: var(--teal-deep);
+    font-weight: 500;
+  }
+
+  /*
+   * 窄屏保持贴图 2 倍整数缩放：非整数缩放会让像素贴图出现不均匀锯齿，
+   * 且槽位会小于触控目标。宽度不够时允许横向滚动而不是继续压缩。
+   */
+  .gui-bench {
+    overflow-x: auto;
+    /* 滚动条留出空间，避免遮住贴图底边 */
+    padding-bottom: 4px;
+  }
+
+  .gui-stage {
+    /*
+     * 176 × 3。3 倍缩放下槽位是 48px，达到触控目标；2 倍只有 32px，太小。
+     * 代价是 390px 视口下需要横向滚动约 160px，只影响这一块区域。
+     */
+    min-width: 528px;
+  }
+
+  .type-nav {
+    position: static;
+  }
+
+  /*
+   * 两处小按钮的触控目标。
+   *
+   * 页签关闭原来是 28×28，脚本编辑器的撤销 / 重做是 26×22。DESIGN.md 给
+   * 「删除类小按钮」开了 24px 的例外，但那条例外要求是可点圆形，且 22px
+   * 的高度连例外都不满足。撤销尤其不能将就 —— 触屏没有 Ctrl 键，
+   * 按钮就是唯一的撤销入口（The Undo Must Be Reachable Rule）。
+   *
+   * 抬到 32px 而不是 44px：它们嵌在页签与工具条内部，44px 会把两条栏
+   * 整体撑高一截。32px 已高于 2.5.8 AA 的 24px 下限，与筛选胶囊同档。
+   */
+  .tab-close {
+    width: 32px;
+    height: 32px;
+  }
+
+  .script-tool {
+    min-width: 32px;
+    min-height: 32px;
+  }
+
+  /* 窄屏改两列，避免整宽单列把 11 个类型拉得过长 */
+  .type-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+  }
+
+  .slot {
+    --slot-size: 48px;
+  }
+
+  .slot-lg {
+    --slot-size: 60px;
+  }
+
+  .picker-backdrop {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .picker {
+    width: 100%;
+    max-height: 88vh;
+    border-radius: var(--radius-panel) var(--radius-panel) 0 0;
+  }
+}
+
+/* ---- 离线提示 ---- */
+.catalog-status {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--missing);
+}
+
+/* ---- 切换栏 ---- */
+/*
+ * 工作区唯一的一条切换栏。这里原本是两条（视图页签 + 文件页签），
+ * 但视图已经跟着活动页走，上面那条退化成只读投影，合并掉了。
+ *
+ * 底色关系是这条栏的关键：栏本身用下沉色后退，选中的页签取应用底色 ——
+ * 也就是它正下方工作区的颜色 —— 并盖住栏的底部描边。这样选中页签读起来是
+ * 下方那张纸的前缘，而不是浮在栏上的一个按钮。
+ * 反过来（栏取应用色、页签取面板白）会让页签比页面更亮，隐喻就断了。
+ */
+.tab-bar {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 0 24px;
+  background: var(--surface-sunken);
+  border-bottom: 1px solid var(--border);
+}
+
+/*
+ * 页签多到放不下时横向滚动，而不是折行把这条撑高。
+ *
+ * 滚动条本身不显示：这条栏只有 34px 高，一根 8–12px 的滚动槽会占掉三分之一，
+ * 而且它只在页签溢出时出现 —— 栏的高度会随开页数量跳变。滚动能力照旧，
+ * 改由拖拽与滚轮承担（见 TabBar 的 onWheel / onPointerDown）。
+ *
+ * 顺带修掉了那条「明明没几个页签也冒出来的滚动条」：页签有
+ * margin-bottom: -1px（拿来压住栏的底部描边），所以它的 34px 盒子在这个
+ * 33px 高的容器里纵向溢出 1px —— 量得 scrollHeight 34 / clientHeight 33。
+ * overflow-y: hidden 只是把那 1px 裁掉，容器本身仍是滚动容器，
+ * 于是在 Windows 的传统滚动条下浏览器照样给横向滚动条留出槽位。
+ * 隐掉滚动条之后这一条就不再有可见后果（滚动位置仍被 y 轴钳在 0）。
+ */
+.tab-strip {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  min-width: 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  /* 拖拽时不要选中页签标题文字 */
+  overscroll-behavior-x: contain;
+}
+
+.tab-strip::-webkit-scrollbar {
+  display: none;
+}
+
+/* 拖动中：光标表明这条栏正被拖，并且屏蔽文本选择 */
+.tab-strip.is-dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
+/* 物品组与文件之间的分界：它是常驻的单一配置，不是一份打开的文件 */
+.tab-divider {
+  width: 1px;
+  height: 18px;
+  margin: 0 2px 10px;
+  background: var(--border);
+  flex: none;
+}
+
+/*
+ * 页签本体。position: relative 是为了 ::before 那条顶部指示条。
+ * margin-bottom: -1px 让选中页签压住 .tab-bar 的底部描边——
+ * 页签与工作区连成一张纸靠的就是这 1px。
+ */
+.tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  margin-bottom: -1px;
+  padding: 0 6px 0 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control) var(--radius-control) 0 0;
+  background: transparent;
+  font-size: 13px;
+  color: var(--text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  /* 指数衰减，与全站同一条缓动 */
+  transition:
+    background 160ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.tab:hover {
+  /* 栏已经是下沉色，hover 用应用底色提亮一档，方向与选中态一致 */
+  background: var(--surface-app);
+  color: var(--text);
+}
+
+.tab.is-active {
+  border-color: var(--border);
+  /* 底边与自身同色，等于在栏的描边上开一个口，页签由此连进下方页面 */
+  border-bottom-color: var(--surface-app);
+  background: var(--surface-app);
+  color: var(--text);
+  font-weight: 500;
+}
+
+/*
+ * 选中标记是顶沿一条 2px 状态青绿。
+ * 不用整块青绿底：这条栏上可能同时有 6 个页签，其中一个整块着色会把
+ * 青绿的屏占比推过 10%（The One Teal Rule），而顶沿细条只占几百像素。
+ */
+.tab.is-active::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: var(--teal);
+}
+
+/* 焦点环与全站一致用 --teal-deep，见 styles.css 里那段说明 */
+.tab:focus-visible {
+  outline: 2px solid var(--teal-deep);
+  outline-offset: -2px;
+}
+
+/*
+ * 物品组段：常驻，不可关闭。
+ * 左内边距与文件页签同为 10px（图标起点对齐），右边给 12px ——
+ * 它没有关闭按钮，用不着文件页签那 6px 的收窄。
+ */
+.tab-pinned {
+  padding: 0 12px 0 10px;
+  font: inherit;
+  font-size: 13px;
+}
+
+.tab-count {
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--teal-deep);
+  color: var(--on-accent);
+  font-size: 11px;
+  line-height: 16px;
+  text-align: center;
+  flex: none;
+}
+
+/*
+ * 15px 而不是 13px：量过 13px 下 recipe 图标 89% 的像素落在部分透明上，
+ * 图形整个糊成一团、读起来只是「一张纸」，认不出是工作台。
+ * 也不再压 opacity —— 描线本来就细，再降不透明度等于让它更糊；
+ * 颜色交给 currentColor，未选中页签的字色本身已经是次级灰。
+ */
+.tab-kind {
+  width: 15px;
+  height: 15px;
+  flex: none;
+}
+
+/* 工作站方块图是像素画，缩放时不能插值，否则边缘发虚 */
+.tab-kind-block {
+  image-rendering: pixelated;
+  object-fit: contain;
+}
+
+.tab-title {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tab-close {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.tab-close:hover {
+  background: var(--surface-sunken);
+  opacity: 1;
+}
+
+.tab.is-active .tab-close:hover {
+  /* 选中页签底色是应用色，hover 用下沉色压暗一档才看得出反馈 */
+  background: var(--surface-sunken);
+}
+
+/*
+ * 关闭叉用两条线画，不用文字 ×。
+ * 字形的 × 在不同字体里粗细和视觉重心差别很大，中文字体下还会偏大；
+ * 两条 1px 线在任何字体环境下都一样。
+ */
+.tab-close-glyph {
+  position: relative;
+  width: 9px;
+  height: 9px;
+}
+
+.tab-close-glyph::before,
+.tab-close-glyph::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+}
+
+.tab-close-glyph::before {
+  transform: rotate(45deg);
+}
+
+.tab-close-glyph::after {
+  transform: rotate(-45deg);
+}
+
+/* ---- 撤销 / 重做 ---- */
+/*
+ * 作用域是整个工作区（换类型、重置、关页签、导入覆盖），因此和「新建」
+ * 一样属于这条栏。必须是可点按钮而不只有快捷键：触屏没有 Ctrl 键。
+ *
+ * margin-left: auto 在这里，把它和后面的新建入口一起推到右端；
+ * .tab-new 原来那句因此不再生效，但留着无害（它现在紧跟本组之后）。
+ */
+.tab-history {
+  display: flex;
+  align-items: stretch;
+  height: 28px;
+  margin-left: auto;
+  align-self: center;
+  flex: none;
+  gap: 2px;
+}
+
+.tab-history-btn {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  align-self: stretch;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    background 160ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.tab-history-btn:hover:not(:disabled) {
+  background: var(--surface-sunken);
+  color: var(--text-strong);
+}
+
+/*
+ * disabled 保留在原位而不隐藏：位置固定的控件才找得到第二次。
+ * 0.4 让它明显退到背景里，但轮廓仍在，用户知道「这里有个撤销，只是现在没得撤」。
+ */
+.tab-history-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/*
+ * 箭头用 CSS 画：为两个字形单独引两个 SVG 不值得，文字按钮在这里太占宽。
+ * 画法是一段圆弧（上半个圆环）加一个箭头头，撤销朝左、重做水平翻转。
+ */
+.tab-history-glyph {
+  position: relative;
+  width: 13px;
+  height: 11px;
+}
+
+.tab-history-glyph::before {
+  /* 弧身：只留上半圈，下半圈被 height 裁掉 */
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 1px;
+  width: 11px;
+  height: 9px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+  transform: rotate(-45deg);
+}
+
+.tab-history-glyph::after {
+  /* 箭头头：两条边组成的折角，落在弧的左端 */
+  content: "";
+  position: absolute;
+  top: 1px;
+  left: 0;
+  width: 5px;
+  height: 5px;
+  border-left: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+}
+
+/*
+ * 重做是同一个字形水平翻转。用变量而不是直接写 transform：
+ * 下面 history-sweep 的关键帧要在保留这次翻转的前提下再叠旋转，
+ * 写死 scaleX(-1) 的话动画会把它覆盖掉，重做键按下去箭头会瞬间翻向。
+ */
+.tab-history-glyph {
+  --glyph-flip: 1;
+  transform: scaleX(var(--glyph-flip));
+}
+
+.tab-history-glyph.is-redo {
+  --glyph-flip: -1;
+}
+
+/*
+ * 按下之后字形沿自己的弧扫一下。
+ *
+ * 撤销是这个工具里唯一「按下去不知道发生了什么」的操作：它可能改的是
+ * 看不见的地方（换类型、关页签、重置），而右栏的 yaml-line-settle 是
+ * 副作用，不是这次按键的回执。这里先由按钮自己确认「这一下生效了」，
+ * 再由被恢复的槽位说明改的是哪里。
+ *
+ * 只有真的撤回了才播：App 里 canUndo 为假时直接 return，不递增计数。
+ * 幅度取 -24deg，方向跟着 --glyph-flip 自动镜像，所以重做是往回扫。
+ */
+/*
+ * 只动 transform 与 opacity，不动颜色。字形是 currentColor 画的，
+ * 而它的静止色随状态变（resting --text-muted，hover --text-strong），
+ * 在关键帧里写死任一个都会在「按完但指针还压着」的 260ms 里闪错颜色。
+ * 淡入 + 扫到位已经足够说明这一下生效了。
+ */
+@keyframes history-sweep {
+  from {
+    opacity: 0.5;
+    transform: scaleX(var(--glyph-flip)) rotate(-28deg);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(var(--glyph-flip)) rotate(0deg);
+  }
+}
+
+/*
+ * 首帧就是终态，动画只在 React 因 key 变化重挂载时播放一次 ——
+ * 与 .icon-swap 同一套做法。不能靠加 class 触发：连按同一个键时
+ * class 没有变化，CSS 不会重播，观感是第二下没反应。
+ * key 挂在字形 span 上而不是按钮上，按钮不重挂载，焦点不会掉。
+ */
+.tab-history-glyph.is-sweeping {
+  animation: history-sweep 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/*
+ * 窄屏抬到 44px。触屏没有 Ctrl 键，按钮是唯一的撤销入口，
+ * 而撤销要在「刚才手滑了」那一刻一次点中，不能将就 32px。
+ *
+ * 这条媒体查询写在这里而不是 responsive 分区：@import 顺序里
+ * tab-history 排在 responsive 之后（顺序不能重排，见 styles/README.md），
+ * 放那边会被这里的 28px 覆盖 —— 实测过，窄屏量出来仍是 30×28。
+ */
+@media (max-width: 767px) {
+  .tab-history {
+    height: 44px;
+  }
+
+  .tab-history-btn {
+    width: 44px;
+  }
+}
+
+/* ---- 新建入口（分裂按钮） ---- */
+/*
+ * 主键直接新建配方，箭头展开其余项。
+ * 两个并排的文字按钮在这条栏上有 176px 宽，比页签本身还抢眼，
+ * 而「新建配方」是这里唯一的高频动作，值得一键到位。
+ */
+/*
+ * 高度写在外框这一处，两个分段用 stretch 跟随（见下面那段说明）。
+ * 28px = 分段 26px + 自己的上下描边各 1px，分段高度与改动前一致。
+ *
+ * align-self: center 取代原来的 margin-bottom: 5px —— 那个值是按 34px
+ * 页签手算的，页签一变高（窄屏 44px）就得跟着改；居中让它自己对齐。
+ *
+ * 推到右端的 margin-left: auto 移到了前面的 .tab-history 上：现在是
+ * 「撤销 / 重做 + 新建」这一组整体靠右，两者之间不该被 auto 撑开。
+ */
+.tab-new {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  height: 28px;
+  align-self: center;
+  flex: none;
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-control);
+  background: var(--surface-panel);
+  /*
+   * 这里不能用 overflow: hidden 去裁圆角：菜单浮层是这个元素的绝对定位子元素，
+   * 会被一起裁掉（量过：浮层在 DOM 里、位置也对，但完全不可见）。
+   * 改成让两个分段自己带圆角。
+   */
+}
+
+.tab-new-main {
+  border-radius: calc(var(--radius-control) - 1px) 0 0 calc(var(--radius-control) - 1px);
+}
+
+.tab-new-more {
+  border-radius: 0 calc(var(--radius-control) - 1px) calc(var(--radius-control) - 1px) 0;
+}
+
+/*
+ * 两个分段不写死高度：由 .tab-new 的 align-items: stretch 撑满整个外框，
+ * 字形再用 place-items: center 落在各自分段的正中。
+ * 之前写的是 height: 26px —— 那既让分段短于外框（stretch 被固定高度顶掉，
+ * 留下两条 1px 的死带），也让「按钮的可点区域」小于看起来的边框范围。
+ * 现在外框高度由 .tab-new 一处定义，两段自动跟随。
+ */
+.tab-new-main,
+.tab-new-more {
+  display: grid;
+  place-items: center;
+  align-self: stretch;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    background 160ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.tab-new-main {
+  width: 30px;
+}
+
+.tab-new-more {
+  width: 20px;
+  border-left: 1px solid var(--border-control);
+}
+
+.tab-new-main:hover,
+.tab-new-more:hover,
+.tab-new-more[aria-expanded="true"] {
+  background: var(--teal-wash);
+  color: var(--teal-deep);
+}
+
+.tab-new-main:focus-visible,
+.tab-new-more:focus-visible {
+  outline: 2px solid var(--teal-deep);
+  outline-offset: -2px;
+}
+
+/* 加号同样用两条线画，理由同 .tab-close-glyph */
+.tab-new-glyph {
+  position: relative;
+  width: 11px;
+  height: 11px;
+}
+
+.tab-new-glyph::before,
+.tab-new-glyph::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1.5px;
+  border-radius: 1px;
+  background: currentColor;
+}
+
+.tab-new-glyph::after {
+  transform: rotate(90deg);
+}
+
+.tab-new-caret {
+  width: 0;
+  height: 0;
+  border-left: 3.5px solid transparent;
+  border-right: 3.5px solid transparent;
+  border-top: 4px solid currentColor;
+}
+
+.tab-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 60;
+  min-width: 180px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-panel);
+  background: var(--surface-panel);
+  box-shadow: var(--shadow-overlay);
+  display: flex;
+  flex-direction: column;
+}
+
+.tab-menu button {
+  padding: 7px 10px;
+  border: none;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.tab-menu button:hover:not(:disabled) {
+  background: var(--teal-wash);
+  color: var(--teal-deep);
+}
+
+.tab-menu button:disabled {
+  color: var(--text-muted);
+  opacity: 0.5;
+  cursor: default;
+}
+
+.tab-menu button:focus-visible {
+  outline: 2px solid var(--teal-deep);
+  outline-offset: -2px;
+}
+
+.tab-menu-sep {
+  height: 1px;
+  margin: 4px 6px;
+  background: var(--border);
+}
+
+/* ---- 启动页 ---- */
+.start-screen {
+  display: grid;
+  place-items: center;
+  padding: 48px 16px;
+}
+
+.start-card {
+  max-width: 520px;
+  padding: 28px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-panel);
+  background: var(--surface-panel);
+  box-shadow: var(--shadow-lift);
+  text-align: center;
+}
+
+.start-title {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+
+.start-note {
+  margin: 0 0 20px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.start-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.start-hint {
+  margin: 18px 0 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+/* 物品组与触发器是单栏工作区 */
+.workspace-single {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 980px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.stack-panels {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+/* ---- 标签 / 物品组徽标 ---- */
+.slot-badge,
+.gui-slot-badge {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  min-width: 13px;
+  height: 13px;
+  padding: 0 3px;
+  border-radius: 3px;
+  background: var(--teal-deep);
+  color: var(--on-accent);
+  font-size: 9px;
+  line-height: 13px;
+  text-align: center;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.slot.is-group,
+.gui-slot.is-group {
+  /* 非具体物品的材料用虚线边框区分 */
+  outline: 1px dashed var(--teal);
+  outline-offset: -2px;
+}
+
+/* ---- 物品组编辑器 ---- */
+.pack-list,
+.trigger-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pack-card,
+.trigger-card {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--surface-app);
+}
+
+.trigger-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.trigger-card.is-disabled {
+  opacity: 0.62;
+}
+
+.pack-card-head,
+.trigger-card-head {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.trigger-card-head {
+  margin-bottom: 0;
+}
+
+.pack-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pack-item {
+  position: relative;
+}
+
+/* 24px 是 2.5.8 AA 的下限。删除是不可逆操作，不能比这更小 */
+.pack-item-remove {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--border-control);
+  border-radius: 50%;
+  background: var(--surface-panel);
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition:
+    opacity 140ms ease,
+    color 140ms ease,
+    border-color 140ms ease;
+}
+
+.pack-item:hover .pack-item-remove,
+.pack-item-remove:focus-visible {
+  opacity: 1;
+}
+
+.pack-item-remove:hover {
+  color: var(--missing);
+  border-color: var(--missing);
+}
+
+.slot-add {
+  border-style: dashed;
+  color: var(--text-muted);
+  font-size: 20px;
+  font-weight: 300;
+}
+
+.slot-add:hover {
+  color: var(--teal-deep);
+}
+
+/* ---- 触发器编辑器 ---- */
+.trigger-cond-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.trigger-cond-head .chip-row {
+  margin-top: 0;
+}
+
+.textarea {
+  height: auto;
+  padding: 8px 10px;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+/* ---- 选择器页签 ---- */
+.picker-tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.picker-tab {
+  flex: 1;
+  height: 30px;
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-control);
+  background: var(--surface-panel);
+  font-size: 13px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    background 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease;
+}
+
+.picker-tab:hover {
+  border-color: var(--teal);
+  color: var(--teal-deep);
+}
+
+.picker-tab[aria-selected="true"] {
+  border-color: var(--teal);
+  background: var(--teal-wash);
+  color: var(--teal-deep);
+  font-weight: 500;
+}
+
+/* 标签与物品组没有贴图，用字形占位 */
+.picker-item-glyph {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  color: var(--teal-deep);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* ---- 动画 ---- */
+/*
+ * 主题切换时新图标的换入。
+ *
+ * 整页配色是瞬间翻转的，图标是唯一能承载「刚刚换了」的地方：
+ * 新字形从缩小、旋转的位置收敛到正位，方向与该字形的 hover 动作同向
+ * （太阳顺时针、月亮逆时针），所以按下去的手感是把它转到位。
+ */
+@keyframes theme-icon-swap {
+  from {
+    opacity: 0;
+    transform: rotate(var(--icon-swap-from)) scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+@keyframes overlay-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 浮层挂在按钮右下，从那个角展开，位置来源才看得懂 */
+@keyframes lang-panel-open {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes picker-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/*
+ * 提示条从上方落下、再收回上方。
+ *
+ * 位置从屏幕底部挪到顶栏下沿之后，原来的「从下方升起」就变成了
+ * 从顶栏里钻出来又缩回去 —— 方向必须跟着位置翻过来。
+ * translateX(-50%) 是它的居中方式，每一帧都要带着，否则会甩到右边。
+ */
+@keyframes toast-drop {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* 退场比入场快，并且只收一半距离：它是自动消失的，不需要被看清怎么走的 */
+@keyframes toast-lift {
+  from {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-6px);
+  }
+}
+
+@keyframes card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes panel-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/*
+ * 材料落位反馈。不做回弹：过冲后拉回是回弹族观感，
+ * 换成单向收敛 + 指数衰减，反馈依然明确但更利落。
+ */
+@keyframes slot-pop {
+  from {
+    transform: scale(0.82);
+    opacity: 0.4;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 首帧就是终态，动画只在 React 因 key 变化重挂载时播放一次 */
+.icon-swap {
+  animation: theme-icon-swap 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.icon-swap.icon-day {
+  --icon-swap-from: -60deg;
+}
+
+.icon-swap.icon-night {
+  --icon-swap-from: 30deg;
+}
+
+/*
+ * 视图与步骤切换的转场。
+ *
+ * 三个顶部视图、窄屏三个步骤，切换的都是整块工作区。原本是原地瞬间替换，
+ * 没有交接感；而横向推移在这里又太重——三个视图是并列关系，没有「哪边
+ * 更靠前」，硬给方向反而像界面顿了一下。
+ *
+ * 所以只做交叉溶解：旧帧先撤，新帧从 0.985 收敛到 1。没有位移，
+ * 缩放幅度小到读不出「在动」，只留下「这一屏换过了」。
+ */
+@supports (view-transition-name: none) {
+  .workspace,
+  .workspace-single {
+    view-transition-name: workspace;
+  }
+
+  /*
+   * 默认行为里整页快照（root）还会自己交叉淡入淡出，叠在工作区的推移上
+   * 是两层动画同时跑：顶栏、页签、页脚明明没变，却跟着闪一下。
+   * 这里按住 root，只让工作区动——顶栏与页脚是稳定的框，不参与转场。
+   */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+  }
+
+  /*
+   * 两个视图高度不同时，group 会顺带插值宽高。旧帧撤得比 group 快，
+   * 于是看不到拉伸过程，只看到新帧就位。
+   */
+  ::view-transition-group(workspace) {
+    animation-duration: 240ms;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  ::view-transition-old(workspace),
+  ::view-transition-new(workspace) {
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    transform-origin: center top;
+    /* 高度不同的两个视图交接时，按顶部对齐裁切，避免整体拉伸 */
+    height: 100%;
+    object-fit: none;
+    object-position: top center;
+  }
+
+  /* 旧帧只负责让位，退得快一点，避免和新帧叠着一起亮 */
+  ::view-transition-old(workspace) {
+    animation-name: vt-dissolve-out;
+    animation-duration: 120ms;
+  }
+
+  ::view-transition-new(workspace) {
+    animation-name: vt-dissolve-in;
+    animation-duration: 240ms;
+  }
+}
+
+@keyframes vt-dissolve-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes vt-dissolve-in {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/*
+ * 浮层从触发槽位展开。
+ *
+ * 九个合成槽位外观完全相同，浮层若从屏幕中央淡入，就看不出正在编辑哪一格。
+ * --origin-x / --origin-y 是槽位中心相对视口中心的偏移，由 pickerOrigin.ts 写入：
+ * 起始帧把浮层缩到那个点上，再收敛回居中，来源因此始终可读。
+ * 缩放起点 0.6 而不是更小：小于这个值时浮层内的文字在前几帧会糊成一团。
+ */
+@keyframes picker-from-slot {
+  from {
+    opacity: 0;
+    transform: translate(var(--origin-x, 0), var(--origin-y, 0)) scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+.picker-from-slot {
+  animation: picker-from-slot 240ms cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: center;
+}
+
+/*
+ * 浮层收回来源槽位。
+ *
+ * pickerOrigin.ts 的注释里写的是「浮层从那个点展开，关闭时收回去」——
+ * 展开做了，收回一直没做，关闭是直接卸载。
+ *
+ * 不是完整倒放：回到 scale(0.6) 需要和入场一样的 240ms 才不显得慌，
+ * 而关闭时用户已经做完决定（点了物品或按了 Esc），浮层只需要让开。
+ * 所以只朝来源走 22% 并收到 0.94 —— 方向仍然读得出是回到那一格，
+ * 但 160ms 内就走完。文字在这个幅度里不会糊。
+ */
+@keyframes picker-to-slot {
+  from {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(
+        calc(var(--origin-x, 0px) * 0.22),
+        calc(var(--origin-y, 0px) * 0.22)
+      )
+      scale(0.94);
+  }
+}
+
+/* 没有来源坐标时（键盘触发拿不到位置）只淡出并轻微收拢，不乱给方向 */
+@keyframes picker-sink {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+}
+
+@keyframes overlay-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/*
+ * 关闭时序：浮层 160ms 先收完，幕布 180ms 再撤。
+ * 差这 20ms 才读得出先后 —— 一起消失是「界面被清空」，
+ * 有先后是「浮层走了，幕布跟着撤」。
+ * 时长与 App 里 PICKER_LEAVE_MS 绑定，改一处要改两处。
+ */
+.picker-backdrop.is-leaving {
+  animation: overlay-fade-out 180ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  /* 退场期间浮层还挂着，但已经不该再接收点击 */
+  pointer-events: none;
+}
+
+.picker-backdrop.is-leaving .picker-from-slot {
+  animation: picker-to-slot 160ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.picker-backdrop.is-leaving .picker:not(.picker-from-slot) {
+  animation: picker-sink 160ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* 语言浮层从触发按钮那侧展开，而不是凭空淡入 */
+.lang-panel {
+  animation: lang-panel-open 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: top right;
+}
+
+.picker-backdrop {
+  animation: overlay-fade-in 140ms ease-out;
+}
+
+/* 没有来源坐标时（键盘触发拿不到位置等）退回居中升起 */
+.picker:not(.picker-from-slot) {
+  animation: picker-rise 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.toast {
+  animation: toast-drop 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/*
+ * 退场。原来是计时器一到直接卸载，凭空消失 —— 入场做了退场不做，
+ * 观感是被抽走而不是离开。现在由 App 先挂 is-leaving，
+ * 140ms 后才真正卸载，两个时长必须对齐（改一个要改另一个）。
+ */
+.toast.is-leaving {
+  animation: toast-lift 140ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/*
+ * 工作区的挂载动画。
+ *
+ * 支持 View Transitions 的浏览器里，视图切换已经由 ::view-transition-*
+ * 承担推移，这里再放一次 panel-enter 就是两层动画同时跑（快照在退场、
+ * 新 DOM 又自己升起一遍），观感是抖一下。因此只在不支持转场的浏览器上
+ * 保留这条挂载动画，作为「内容换了」的最低反馈。
+ */
+@supports not (view-transition-name: none) {
+  .workspace {
+    animation: panel-enter 220ms ease-out;
+  }
+}
+
+.pack-card.is-enter,
+.trigger-card.is-enter {
+  animation: card-enter 200ms ease-out;
+}
+
+/* 放入材料时图标收进来，给出明确的落位反馈。曲线与浮层、提示条同族 */
+.slot.is-filled img,
+.gui-slot-icon {
+  animation: slot-pop 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/*
+ * 撤销 / 重做刚恢复的槽位。
+ *
+ * 语汇和右栏的 yaml-line-settle 一致：亮起来，然后自己退掉。它回答的是
+ * 「刚才那一下撤回的是哪几格」，看过就没用了，留着会变成常驻花纹。
+ *
+ * 为什么不能靠 slot-pop 顶替：那条动画挂在 <img> 上，只在 React 重挂图标时
+ * 才播。撤销把物品换成另一个物品时 <img> 还是同一个节点（只换 src），
+ * 撤销把物品清空时 <img> 直接卸载 —— 两种最需要提示的情况它都不响。
+ * 所以标记挂在槽位本身，由 App 算出地址集合后下发。
+ *
+ * 用 inset box-shadow 而不是底色：GUI 贴图上不能覆盖任何半透明填充
+ * （DESIGN.md），内描边是唯一能压在贴图上又不破坏像素观感的表达。
+ * 900ms 比 yaml 行的 1200ms 短一档：槽位在视线正中，不需要那么久。
+ */
+@keyframes slot-restored {
+  0% {
+    box-shadow: inset 0 0 0 2px var(--teal-deep);
+  }
+  45% {
+    box-shadow: inset 0 0 0 2px var(--teal-deep);
+  }
+  100% {
+    box-shadow: inset 0 0 0 2px transparent;
+  }
+}
+
+.slot.is-restored,
+.gui-slot.is-restored {
+  animation: slot-restored 900ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/*
+ * 选中态的内描边优先级更高：正在编辑的那一格不该被这次高亮盖掉。
+ * 放在 is-restored 之后，层叠上压过上面那条。
+ */
+.gui-slot.is-restored.is-active,
+.slot.is-restored.is-active {
+  animation: none;
+}
+
+/*
+ * 这里曾经加过一段「物品清单到货时前 12 条依次铺开」的 stagger，实测后撤掉了。
+ * 留下记录，避免下一个人再走一遍：
+ *
+ * 前提是错的。以为 loading → ready 是「一行提示文字变成几百个图标」，
+ * 但 itemLookup.searchItems 在清单未就绪时回落到 163 条内置物品，
+ * 而空搜索词下 sortResults 按 COMMON_RANK 排序 —— 内置物品正是常用物品，
+ * 两态下都被顶在最前面。实测可见的 120 条里，第一处差异在下标 32。
+ *
+ * 也就是说给前 12 条做入场动画，动的全是没变过的内容。那是装饰，
+ * 不是状态交接（DESIGN.md：不添加与状态无关的装饰动效）。
+ * 改成给 32 之后的条目做也不成立：那些在视口外，而且没有延迟上限可言。
+ */
+
+.gui-slot:active,
+.slot:active {
+  transform: scale(0.96);
+}
+
+.picker-item {
+  transition:
+    background 140ms ease,
+    border-color 140ms ease,
+    transform 140ms ease;
+}
+
+.picker-item:active {
+  transform: scale(0.98);
+}
+
+.type-item {
+  transition:
+    background 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease;
+}
+
+/*
+ * 尊重系统的减少动态偏好：关闭位移与缩放类动画，
+ * 保留颜色过渡，避免界面显得完全无反馈。
+ */
+@media (prefers-reduced-motion: reduce) {
+  .picker-backdrop,
+  .picker,
+  .picker:not(.picker-from-slot),
+  .picker-from-slot,
+  .picker-backdrop.is-leaving,
+  .picker-backdrop.is-leaving .picker-from-slot,
+  .picker-backdrop.is-leaving .picker:not(.picker-from-slot),
+  .toast,
+  /*
+   * .toast.is-leaving 必须单独列出，不能靠上面那条 .toast 覆盖：
+   * 它是两个类（0,2,0），比 .toast（0,1,0）更具体，媒体查询不加权重，
+   * 只写 .toast 的话退场动画在减少动态偏好下照样跑。实测过。
+   */
+  .toast.is-leaving,
+  .tab-history-glyph.is-sweeping,
+  .workspace,
+  .pack-card.is-enter,
+  .trigger-card.is-enter,
+  .slot.is-filled img,
+  .gui-slot-icon,
+  .icon-swap,
+  .item-hover-preview-track.is-scrolling,
+  .lang-panel {
+    animation: none;
+  }
+
+  /*
+   * 退场动画去掉之后，元素必须自己隐掉。
+   *
+   * 上面那条 animation: none 撤掉的是 forwards 填充的终态，
+   * 不撤销「它还挂在 DOM 上」这个事实 —— App 要等计时器到点才卸载。
+   * 不补这两句的话，减少动态偏好下的观感是浮层/提示条在关闭后
+   * 又完整停留一段时间，比没有退场更糟。
+   */
+  .picker-backdrop.is-leaving,
+  .toast.is-leaving {
+    opacity: 0;
+  }
+
+  /*
+   * 撤销恢复了哪几格是信息，不是装饰，所以标记要留下，只是不再有淡出过程。
+   * 与 .yaml-line.is-changed 同一处理：换成常驻内描边，由 JS 到时移除 class。
+   */
+  .slot.is-restored,
+  .gui-slot.is-restored {
+    animation: none;
+    box-shadow: inset 0 0 0 2px var(--teal-deep);
+  }
+
+  .gui-slot.is-restored.is-active,
+  .slot.is-restored.is-active {
+    box-shadow: inset 0 0 0 2px var(--teal-deep);
+  }
+
+  /*
+   * 变更行改成静态底色而不是整条去掉：这是本次编辑落在哪几行的信息，
+   * 不是装饰。动画换成常驻底色，标记仍在（由 JS 到时移除 class），
+   * 只是不再有淡出过程。
+   */
+  .yaml-line.is-changed {
+    animation: none;
+    background: var(--yaml-changed);
+  }
+
+  /* 状态行保留颜色变化本身，去掉过渡时长即可 */
+  .status-line,
+  .status-dot {
+    transition: none;
+  }
+
+  .gui-slot:active,
+  .slot:active,
+  .picker-item:active {
+    transform: none;
+  }
+
+  /*
+   * 图标的旋转与缩放全部去掉：这两个按钮的 hover 还有底色变化，
+   * 去掉字形动作不会失去「可点」的线索。
+   */
+  .icon-day,
+  .icon-night,
+  .icon-language {
+    transition: none;
+  }
+
+  .btn:hover:not(:disabled) .icon-day,
+  .btn:hover:not(:disabled) .icon-night,
+  .btn:hover:not(:disabled) .icon-language,
+  .lang-menu .btn[aria-expanded="true"] .icon-language,
+  .btn-icon:active:not(:disabled) .icon-glyph {
+    transform: none;
+  }
+}
+
+/* ---- 脚本编辑器 ---- */
+/*
+ * 高亮实现方式：透明 textarea 叠在着色 pre 上。
+ * 两层必须用完全相同的字体、字号、行高、padding 与换行规则，
+ * 任何一项不一致都会让光标和着色文字错位。
+ */
+/*
+ * 两层结构：.script-editor 只做定位锚点，不裁剪，让候选浮层能挂到下沿外侧；
+ * .script-surface 承担边框、圆角与裁剪。
+ */
+.script-editor {
+  position: relative;
+}
+
+/*
+ * 撤销 / 重做。
+ *
+ * 快捷键是主路径，这两个按钮是给触屏用的：手机上没有 Ctrl 键，
+ * 没有按钮就完全没法撤销。放在编辑区上沿右侧，不占代码宽度。
+ */
+.script-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  margin-bottom: 4px;
+}
+
+.script-tool {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.script-tool:hover:not(:disabled) {
+  background: var(--surface-sunken);
+  color: var(--text);
+}
+
+.script-tool:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.script-tool:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 1px;
+}
+
+/*
+ * 箭头用内联 SVG 而不是 ↶ ↷ 字形：这两个码位在部分平台字体里缺字，
+ * 会掉成豆腐块。也不用 border 拼，圆弧加箭头尖靠 border 拼出来的
+ * 形状在小尺寸下会糊成一团，看不出方向。
+ */
+.script-tool-icon {
+  display: block;
+  width: 14px;
+  height: 14px;
+  background-color: currentColor;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+/* 逆时针回转箭头 */
+.script-tool-undo {
+  -webkit-mask-image: var(--icon-undo);
+  mask-image: var(--icon-undo);
+}
+
+/* 顺时针，与撤销镜像对称 */
+.script-tool-redo {
+  -webkit-mask-image: var(--icon-redo);
+  mask-image: var(--icon-redo);
+}
+
+.script-surface {
+  position: relative;
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-control);
+  background: var(--se-background);
+  overflow: hidden;
+}
+
+.script-editor:focus-within .script-surface {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 2px var(--teal-wash);
+}
+
+/*
+ * .script-caret-probe 也在这一组里：它是量光标像素位置用的隐藏镜像，
+ * 字体 / 字号 / 行高 / 内边距 / 换行规则任何一项和 textarea 不一致，
+ * 量出来的位置就是错的。所以它必须和这两层共用同一条规则，不能另写一份。
+ */
+.script-highlight,
+.script-input,
+.script-caret-probe {
+  margin: 0;
+  padding: 8px 10px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  tab-size: 2;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  border: none;
+}
+
+.script-caret-probe {
+  position: absolute;
+  inset: 0;
+  /* 只用来量尺寸，不参与显示，也不该被读屏或点到 */
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.script-highlight {
+  overflow: hidden;
+  color: var(--se-plain);
+  pointer-events: none;
+  min-height: 100%;
+}
+
+.script-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  resize: vertical;
+  background: transparent;
+  /* 文字透明，只留光标可见；着色由下层 pre 提供 */
+  color: transparent;
+  caret-color: var(--se-caret);
+  outline: none;
+}
+
+/*
+ * 选区里必须把文字重新画出来。
+ *
+ * textarea 的文字是透明的（着色由下层 pre 提供），而选区高亮由 textarea 自己画，
+ * 盖在 pre 上面。只给 background 不给颜色的话，选中的那段就变成一条纯色块，
+ * 底下的高亮被挡住，什么都看不见。
+ *
+ * 这里把选中文字填回 --se-plain：verify-script-contrast.mjs 一直在断言
+ * plain on selection ≥ 4.5（浅色 10.95、深色 8.21），配色表本来就是按
+ * 「选中时用 plain 色」设计的，之前只是 CSS 没把它画出来。
+ *
+ * 代价：选区内失去语法着色，整段变成 plain 色。选中通常是为了删除或替换，
+ * 这时看清字比保留配色更重要。
+ *
+ * color 和 -webkit-text-fill-color 都要写：基础规则用了 color: transparent，
+ * WebKit / Blink 下 text-fill-color 优先级更高，只改 color 不生效。
+ */
+.script-input::selection {
+  background: var(--se-selection);
+  color: var(--se-plain);
+  -webkit-text-fill-color: var(--se-plain);
+}
+
+.script-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* 语法角色配色，值来自 lib/script/theme.ts */
+.se-plain {
+  color: var(--se-plain);
+}
+.se-comment {
+  color: var(--se-comment);
+  font-style: italic;
+}
+.se-string {
+  color: var(--se-string);
+}
+.se-escape {
+  color: var(--se-escape);
+}
+.se-interp {
+  color: var(--se-interp);
+}
+.se-number {
+  color: var(--se-number);
+}
+.se-boolean {
+  color: var(--se-boolean);
+}
+.se-keyword {
+  color: var(--se-keyword);
+  font-weight: 600;
+}
+.se-function {
+  color: var(--se-function);
+}
+.se-unknownFunction {
+  color: var(--se-unknown-function);
+}
+.se-module {
+  color: var(--se-module);
+}
+.se-variable {
+  color: var(--se-variable);
+}
+.se-operator {
+  color: var(--se-operator);
+}
+.se-punctuation {
+  color: var(--se-punctuation);
+}
+
+.se-bracket-match {
+  outline: 1px solid var(--se-match-bracket);
+  border-radius: 2px;
+}
+
+/*
+ * 波浪线用 repeating-linear-gradient 而不是 text-decoration，
+ * 因为需要独立于文字颜色控制粗细与颜色。
+ */
+.se-underline-error,
+.se-underline-warning,
+.se-underline-info {
+  background-repeat: repeat-x;
+  background-position: 0 100%;
+  background-size: 4px 2px;
+  padding-bottom: 1px;
+}
+
+.se-underline-error {
+  background-image: linear-gradient(
+    to right,
+    var(--se-error-underline) 0 2px,
+    transparent 2px 4px
+  );
+}
+
+.se-underline-warning {
+  background-image: linear-gradient(
+    to right,
+    var(--se-warning-underline) 0 2px,
+    transparent 2px 4px
+  );
+}
+
+.se-underline-info {
+  background-image: linear-gradient(
+    to right,
+    var(--se-info-underline) 0 2px,
+    transparent 2px 4px
+  );
+}
+
+/* ---- 参数提示浮窗 ---- */
+/*
+ * 跟着光标走的参数提示，位置由 ScriptEditor 量出后写在 style 上。
+ *
+ * 挂在 .script-editor 上而不是 .script-surface 里：surface 是 overflow: hidden，
+ * 而浮窗要浮到编辑框上沿之外、落在工具栏那条带子上，挂在里面会被裁掉。
+ *
+ * 不设 z-index：它在 DOM 里排在 .script-surface 之后，同为定位元素，
+ * 后者天然画在上面。补全菜单在编辑器下沿外侧，和它不重叠，可以共存。
+ *
+ * 单行平铺不换行：参数填完会一个个走掉，清单本来就在变短；
+ * 真撑不下时右侧省略号截断，也比折成两行盖掉更多代码好。
+ */
+.script-sig-popup {
+  position: absolute;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  padding: 2px 6px;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  background: var(--surface-panel);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-muted);
+  /* 点击穿透回 textarea：浮窗盖着代码时不挡光标定位，
+     贴到右边盖住撤销 / 重做时按钮也还能点 */
+  pointer-events: none;
+}
+
+/* 当前要填的那个参数加重，后面待填的保持 muted */
+.script-sig-param.is-active {
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* ---- 补全候选 ---- */
+/*
+ * 候选浮层挂在编辑器下沿外侧而不是内部底部：
+ * 放在内部会盖住正在编辑的最后一行代码。
+ */
+.script-complete {
+  position: absolute;
+  left: -1px;
+  right: -1px;
+  top: calc(100% + 2px);
+  z-index: 5;
+  max-height: 260px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface-panel);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 12%);
+}
+
+/* 角标固定列 + 内容列，角标顶对齐，说明换行时不跟着居中 */
+.script-complete-item {
+  display: grid;
+  grid-template-columns: 16px 1fr;
+  align-items: start;
+  gap: 8px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.script-complete-item.is-active {
+  background: var(--teal-wash);
+}
+
+.script-complete-kind {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  background: var(--surface-app);
+  color: var(--text-muted);
+}
+
+.script-complete-kind.is-function {
+  color: var(--se-function);
+}
+.script-complete-kind.is-keyword {
+  color: var(--se-keyword);
+}
+.script-complete-kind.is-module {
+  color: var(--se-module);
+}
+.script-complete-kind.is-variable {
+  color: var(--se-variable);
+}
+
+.script-complete-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.script-complete-line {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+.script-complete-label {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  color: var(--text);
+}
+
+/*
+ * 签名允许折行而不是截断：参数个数与类型是这个面板的主角，
+ * sound(sound: string, [volume: number], [pitch: number]) 被截掉就白做了。
+ */
+.script-complete-sig {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.script-complete-requires {
+  flex-shrink: 0;
+  padding: 0 4px;
+  border-radius: 3px;
+  font-size: 10px;
+  background: var(--surface-app);
+  color: var(--text-muted);
+}
+
+.script-complete-returns {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.script-complete-doc {
+  font-size: 11px;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+/* ---- 校验结果 ---- */
+.script-issues {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.script-issue {
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.script-issue-line {
+  flex-shrink: 0;
+  min-width: 52px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+.script-issue.is-error {
+  color: var(--error);
+}
+.script-issue.is-warning {
+  color: var(--missing);
+}
+.script-issue.is-info {
+  color: var(--text-muted);
+}
+
+/*
+ * 新增区块的窄屏适配。
+ * 放在文件末尾，确保能覆盖上面的基础规则（同优先级下后者生效）。
+ */
+@media (max-width: 767px) {
+  .catalog-status {
+    /* 窄屏没有横向空间，状态提示换到下一行 */
+    margin-left: 0;
+    flex-basis: 100%;
+  }
+
+  .workspace-single {
+    padding: 12px 12px 32px;
+  }
+
+  .pack-card-head,
+  .trigger-card-head {
+    flex-wrap: wrap;
+  }
+
+  /* 触屏没有 hover，删除按钮常驻 */
+  .pack-item-remove {
+    opacity: 1;
+  }
+
+  /*
+   * 触控目标：窄屏下这些都是手指直接点的控件，统一给到 44px（2.5.5）。
+   * 顶栏的 .btn 已经是 34px 且横向空间紧张，这里只抬高度不动宽度。
+   */
+  .picker-tab {
+    height: 44px;
+  }
+
+  /* ---- 切换栏的窄屏适配 ---- */
+  .tab-bar {
+    padding: 0 12px;
+    gap: 4px;
+  }
+
+  .tab {
+    height: 44px;
+  }
+
+  /* 分隔线跟着页签变高居中 */
+  .tab-divider {
+    height: 22px;
+    margin-bottom: 11px;
+  }
+
+  /* 关闭区在触屏上要够大，44px 页签里给到 28px 圆形 */
+  .tab-close {
+    width: 28px;
+    height: 28px;
+    border-radius: 14px;
+    /* 触屏没有 hover，常驻可见 */
+    opacity: 0.8;
+  }
+
+  .tab-title {
+    /* 窄屏横向紧张，名字截短一些，靠横向滚动看全 */
+    max-width: 108px;
+  }
+
+  /*
+   * 新建入口在触屏上是手指直接点的目标，两个分段各要到 44px（2.5.5）。
+   * 高度仍只写在外框上，两个分段 stretch 跟随，所以外框要算上自己的
+   * 上下描边：44 + 1 + 1 = 46px，分段落在 44px。
+   * 写 44px 会让分段只有 42px —— check-narrow.mjs 正是这样抓出来的。
+   */
+  .tab-new {
+    height: 46px;
+  }
+
+  .tab-new-main {
+    width: 48px;
+  }
+
+  /*
+   * 箭头段 32×44。宽度没到 44px 是有意的，与筛选胶囊同一类例外：
+   * 2.5.8 AA 的下限是 24px，32px 已留出余量，而分裂按钮整块若做成
+   * 48+44=92px，在 390px 的栏上会比三个页签还宽，主次就颠倒了。
+   * 主操作（新建配方）那一段是 48×44，完全达标。
+   */
+  .tab-new-more {
+    width: 32px;
+  }
+
+  .tab-menu button {
+    /* 菜单项是手指直接点的目标 */
+    min-height: 44px;
+  }
+
+  /* 语言浮层里的每一项都是手指直接点的目标 */
+  .lang-option {
+    height: 44px;
+  }
+
+  /*
+   * 窄屏下浮层贴视口右沿，不再右对齐到触发按钮。
+   * 320px 时按钮右沿只到 157px，而浮层最小宽 172px，右对齐必然溢出视口左侧，
+   * 语言名开头会被裁掉。
+   *
+   * 做法是把定位基准从 .lang-menu 换成 .topbar（它是 sticky，本身就是定位元素）：
+   * top: 100% 自然落在顶栏下沿，顶栏高度以后怎么变都不用改这里。
+   */
+  .lang-menu {
+    position: static;
+  }
+
+  .lang-panel {
+    top: calc(100% + 4px);
+    right: 8px;
+    max-width: calc(100vw - 16px);
+  }
+
+  /*
+   * 撤销 / 重做在触屏上是唯一入口（没有 Ctrl 键），必须给到 44px。
+   * 两个按钮靠右并排，44px 宽在 320px 下也放得开。
+   */
+  .script-tool {
+    width: 44px;
+    height: 44px;
+  }
+
+  /* 输入与下拉在窄屏也是手指直接点的目标 */
+  .input,
+  .select {
+    height: 44px;
+  }
+
+  /* textarea 高度由内容决定，不能被 44px 覆盖成固定高 */
+  .textarea {
+    height: auto;
+  }
+
+  /*
+   * 脚本编辑器是可拖高的输入区，高度随内容走；
+   * 但初始 2 行只有 37px，低于 2.5.5 的 44px 手指目标，因此给下限。
+   */
+  .script-input,
+  .script-highlight {
+    min-height: 44px;
+  }
+
+  /* 所有常规按钮，不只顶栏：导出行、卡片操作等都是手指目标 */
+  .btn {
+    height: 44px;
+  }
+
+  .btn-icon {
+    width: 44px;
+  }
+
+  /* .btn-sm 出现在浮层头部与卡片内，同样抬到触控目标 */
+  .btn-sm {
+    height: 44px;
+  }
+
+  .type-item {
+    min-height: 44px;
+  }
+
+  .footer-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 2px 10px;
+  }
+
+  /*
+   * 胶囊是成组出现的筛选开关（分类有 9 个，条件类型也是一排）。
+   * 这里取 2.5.8 AA 的 24px 下限再留余量，而不是 2.5.5 的 44px：
+   * 全部抬到 44px 会把浮层里本就有限的结果区挤掉两行。
+   */
+  .chip {
+    height: 32px;
+    border-radius: 16px;
+  }
+
+  /* 窄屏横向放不下版权与 5 个链接，改为上下两行 */
+  .app-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 12px 16px;
+  }
+}

@@ -1,0 +1,189 @@
+/* ---- 按钮 ---- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--border-control);
+  background: var(--surface-panel);
+  font-size: 13px;
+  font-weight: 500;
+  transition:
+    background 120ms ease,
+    border-color 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.btn:hover:not(:disabled) {
+  border-color: var(--teal);
+  color: var(--teal-deep);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/*
+ * 主操作保留品牌渐变原色，文字改用深墨：白字压在这条亮渐变上只有 1.8–2.4:1，
+ * 而「下载 YAML」是本工具的终点动作，必须读得清。
+ */
+.btn-primary {
+  border: none;
+  color: var(--on-brand);
+  background: linear-gradient(135deg, var(--brand-a), var(--brand-b));
+}
+
+.btn-primary:hover:not(:disabled) {
+  color: var(--on-brand);
+  box-shadow: var(--shadow-lift);
+}
+
+.btn-quiet {
+  border-color: transparent;
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.btn-quiet:hover:not(:disabled) {
+  background: var(--surface-sunken);
+  color: var(--text);
+}
+
+.btn-sm {
+  height: 28px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+/* 顶栏的图标按钮：正方形，只放一个字形 */
+.btn-icon {
+  width: 34px;
+  padding: 0;
+  justify-content: center;
+  font-size: 15px;
+}
+
+/*
+ * 主题与语言两个图标按钮不要描边：它们是常驻的环境开关，
+ * 不是本页的操作项，静止和 hover 都只用底色变化表达可点。
+ * 焦点环仍由 :focus-visible 提供，键盘可见性不受影响。
+ */
+.btn-quiet.btn-icon,
+.btn-quiet.btn-icon:hover:not(:disabled) {
+  border-color: transparent;
+}
+
+/*
+ * 顶栏图标。
+ *
+ * assets 里的 SVG 是写死的黑色填充，直接 <img> 在深色主题下看不见。
+ * 用 mask 把图形当遮罩、底色取 currentColor，图标就跟着按钮文字色走，
+ * 两套主题都不用另做一份文件。
+ */
+/*
+ * mask-size 是按图定的，不是一个通用值：每个 SVG 的图形占画布的比例不同，
+ * 统一倍数会让留白多的图偏小、铺满的图糊出边界。
+ * 换算是 mask-size = 目标字形边长 ÷ 字形盒 ÷ 图形占画布的比例。
+ *
+ * 顶栏这三个的目标是 18.5px。字形盒 32px（34px 按钮减去 1px 描边×2），
+ * 图形占 800×800 画布的 52.5%（实测 getBBox，作者留的空白）：
+ *   18.5 ÷ 32 ÷ 0.525 ≈ 1.10 → 110%
+ * 也就是约占按钮的 54%，与旁边 13px 文字按钮的视重齐平。
+ *
+ * 之前是 170%（字形 28.6px、占按钮 84%）—— 那个值来自「字形占字形盒 85%」
+ * 的设定，但字形盒本身就撑满了按钮内容区，两层 85% 叠起来等于让图标几乎
+ * 顶到按钮边缘，在文字按钮旁边明显大一号。
+ * 换图或裁掉留白后要重新量 getBBox 并改这里。
+ */
+.icon-glyph {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-color: currentColor;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: var(--icon-mask-size, 110%);
+  mask-size: var(--icon-mask-size, 110%);
+}
+
+.icon-day {
+  -webkit-mask-image: url("/assets/icons/day.svg");
+  mask-image: url("/assets/icons/day.svg");
+}
+
+.icon-night {
+  -webkit-mask-image: url("/assets/icons/night.svg");
+  mask-image: url("/assets/icons/night.svg");
+}
+
+.icon-language {
+  -webkit-mask-image: url("/assets/icons/language.svg");
+  mask-image: url("/assets/icons/language.svg");
+}
+
+/*
+ * 页签图标。这两个图的图形几乎铺满 1024×1024 画布（实测 0.908 / 0.825），
+ * 所以补偿倍数比上面那组小得多。字形盒是 15px（见 .tab-kind），
+ * 目标字形约 12.75px（占字形盒 85%），各自按 0.85 ÷ 实测占比 算：
+ *   item_pack 0.85 ÷ 0.908 ≈ 94%
+ *   trigger   0.85 ÷ 0.825 ≈ 103%
+ *
+ * 原先还有一个 .icon-recipe（recipe.svg）。配方页签改用该类型的工作站
+ * 方块图之后它就没有引用了，资源也已删除 —— 留着会让 Vite 打包时
+ * 因为解析不到 url() 而报错。
+ */
+.icon-item-pack {
+  --icon-mask-size: 94%;
+  -webkit-mask-image: url("/assets/icons/item_pack.svg");
+  mask-image: url("/assets/icons/item_pack.svg");
+}
+
+.icon-trigger {
+  --icon-mask-size: 103%;
+  -webkit-mask-image: url("/assets/icons/trigger.svg");
+  mask-image: url("/assets/icons/trigger.svg");
+}
+
+/*
+ * 图标的 hover 动作。
+ *
+ * 这两个按钮没了描边，hover 时除了底色再没有别的反馈，
+ * 因此让字形本身动一下：光标压上去时图形是活的，说明可点。
+ * 三个字形各按自己的形状选动作，不套同一条通用 hover：
+ *   太阳 8 向对称，转 45° 正好落回自身，转完仍是一个正的太阳；
+ *   月亮只倾斜 -18°，缺口朝向变了但仍读得出是月亮；
+ *   语言图标是「文 / A」两个字符，任何旋转都会让字歪掉，只放大。
+ */
+.icon-day,
+.icon-night,
+.icon-language {
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.btn:hover:not(:disabled) .icon-day {
+  transform: rotate(45deg);
+}
+
+.btn:hover:not(:disabled) .icon-night {
+  transform: rotate(-18deg) scale(1.06);
+}
+
+.btn:hover:not(:disabled) .icon-language {
+  transform: scale(1.1);
+}
+
+/* 语言浮层展开时图标保持放大，图标与浮层是同一个状态 */
+.lang-menu .btn[aria-expanded="true"] .icon-language {
+  transform: scale(1.1);
+}
+
+/* 按下时字形收一下，动作发生在按钮内部，不需要整块位移。放在最后，压过上面两条 hover */
+.btn-icon:active:not(:disabled) .icon-glyph {
+  transform: scale(0.9);
+  transition-duration: 90ms;
+}
