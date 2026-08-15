@@ -283,6 +283,7 @@ export const viVn: Record<MessageKey, string> = {
   "script.fn.conditions.in_rain":
     "Kiểm tra người chơi có đang ở trong mưa hay không",
   "script.fn.conditions.light_level": "Lấy mức độ ánh sáng của khối đang đứng",
+  "script.fn.conditions.match_item_id": "Lấy ID có không gian tên của đối tượng vật phẩm",
   "script.fn.math.abs": "Giá trị tuyệt đối",
   "script.fn.math.min": "Lấy giá trị nhỏ hơn",
   "script.fn.math.max": "Lấy giá trị lớn hơn",
@@ -532,6 +533,13 @@ export const viVn: Record<MessageKey, string> = {
   "triggerType.inventory_click": "Nhấn vào vật chứa",
   "triggerType.inventory_open": "Mở vật chứa",
   "triggerType.inventory_close": "Đóng vật chứa",
+  "triggerType.player_interact_entity": "Tương tác với thực thể",
+  "triggerType.player_animation": "Hoạt ảnh người chơi",
+  "triggerType.player_velocity": "Thay đổi tốc độ",
+  "triggerType.async_player_chat": "Trò chuyện người chơi",
+  "triggerType.player_take_campfire": "Lấy từ đống lửa",
+  "triggerType.prepare_grindstone": "Chuẩn bị bàn mài",
+  "triggerType.trade_select": "Chọn giao dịch",
 
   "issue.fileNameEmpty": "Tên tệp công thức không được để trống.",
   "issue.fileNameNeedsRecipeId":

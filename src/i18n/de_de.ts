@@ -285,6 +285,8 @@ export const deDe: Record<MessageKey, string> = {
   "script.fn.conditions.in_rain": "Prüfen, ob der Spieler im Regen ist",
   "script.fn.conditions.light_level":
     "Lichtstärke am Block des Spielers auslesen",
+  "script.fn.conditions.match_item_id":
+    "Namespaced-ID eines Gegenstandsobjekts ermitteln",
   "script.fn.math.abs": "Absolutwert",
   "script.fn.math.min": "Kleinerer Wert",
   "script.fn.math.max": "Größerer Wert",
@@ -537,6 +539,13 @@ export const deDe: Record<MessageKey, string> = {
   "triggerType.inventory_click": "Inventar anklicken",
   "triggerType.inventory_open": "Inventar öffnen",
   "triggerType.inventory_close": "Inventar schließen",
+  "triggerType.player_interact_entity": "Interaktion mit Entität",
+  "triggerType.player_animation": "Spieler-Animation",
+  "triggerType.player_velocity": "Geschwindigkeitsänderung",
+  "triggerType.async_player_chat": "Spieler-Chat",
+  "triggerType.player_take_campfire": "Lagerfeuer entnehmen",
+  "triggerType.prepare_grindstone": "Schleifstein vorbereiten",
+  "triggerType.trade_select": "Handel auswählen",
 
   "issue.fileNameEmpty": "Der Rezept-Dateiname darf nicht leer sein.",
   "issue.fileNameNeedsRecipeId":

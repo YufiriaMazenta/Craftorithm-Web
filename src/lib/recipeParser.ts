@@ -142,6 +142,14 @@ export function parseRecipeYaml(text: string, fileName?: string): ParseResult {
       .filter(Boolean);
   }
 
+  if (
+    config.result_processors &&
+    typeof config.result_processors === 'object' &&
+    !Array.isArray(config.result_processors)
+  ) {
+    draft.resultProcessors = config.result_processors as Record<string, unknown>;
+  }
+
   /*
    * 手写的 YAML 可能带上插件不会读取的数量，或者超过堆叠上限的数量
    * （`minecraft:stone 100000`）。这里按槽位规则统一归一，并告诉用户改动过，

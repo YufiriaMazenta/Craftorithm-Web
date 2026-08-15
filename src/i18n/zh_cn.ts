@@ -260,6 +260,7 @@ export const zhCn = {
   "script.fn.conditions.in_water": "判断玩家是否在水中",
   "script.fn.conditions.in_rain": "判断玩家是否在雨中",
   "script.fn.conditions.light_level": "取所在方块的光照等级",
+  "script.fn.conditions.match_item_id": "获取物品对象的命名空间 ID",
   "script.fn.math.abs": "绝对值",
   "script.fn.math.min": "取较小值",
   "script.fn.math.max": "取较大值",
@@ -496,6 +497,13 @@ export const zhCn = {
   "triggerType.inventory_click": "点击容器",
   "triggerType.inventory_open": "打开容器",
   "triggerType.inventory_close": "关闭容器",
+  "triggerType.player_interact_entity": "与实体交互",
+  "triggerType.player_animation": "玩家动画",
+  "triggerType.player_velocity": "速度变化",
+  "triggerType.async_player_chat": "玩家聊天",
+  "triggerType.player_take_campfire": "从营火取物",
+  "triggerType.prepare_grindstone": "磨石准备",
+  "triggerType.trade_select": "选择交易",
 
   "issue.fileNameEmpty": "配方文件名不能为空。",
   "issue.fileNameNeedsRecipeId":

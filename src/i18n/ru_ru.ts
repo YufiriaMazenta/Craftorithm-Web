@@ -279,6 +279,8 @@ export const ruRu: Record<MessageKey, string> = {
   "script.fn.conditions.in_rain": "Проверить, находится ли игрок под дождём",
   "script.fn.conditions.light_level":
     "Получить уровень освещения на блоке игрока",
+  "script.fn.conditions.match_item_id":
+    "Получить ID предмета с пространством имён",
   "script.fn.math.abs": "Абсолютное значение",
   "script.fn.math.min": "Меньшее из значений",
   "script.fn.math.max": "Большее из значений",
@@ -524,6 +526,13 @@ export const ruRu: Record<MessageKey, string> = {
   "triggerType.inventory_click": "Клик в инвентаре",
   "triggerType.inventory_open": "Открытие инвентаря",
   "triggerType.inventory_close": "Закрытие инвентаря",
+  "triggerType.player_interact_entity": "Взаимодействие с существом",
+  "triggerType.player_animation": "Анимация игрока",
+  "triggerType.player_velocity": "Изменение скорости",
+  "triggerType.async_player_chat": "Чат игрока",
+  "triggerType.player_take_campfire": "Взять из костра",
+  "triggerType.prepare_grindstone": "Подготовка точила",
+  "triggerType.trade_select": "Выбор торговли",
 
   "issue.fileNameEmpty": "Имя файла рецепта не может быть пустым.",
   "issue.fileNameNeedsRecipeId":

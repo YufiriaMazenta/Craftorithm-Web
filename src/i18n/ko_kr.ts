@@ -277,6 +277,7 @@ export const koKr: Record<MessageKey, string> = {
   "script.fn.conditions.in_water": "플레이어가 물속에 있는지 확인",
   "script.fn.conditions.in_rain": "플레이어가 비를 맞고 있는지 확인",
   "script.fn.conditions.light_level": "있는 블록의 밝기 레벨 가져오기",
+  "script.fn.conditions.match_item_id": "아이템 오브젝트의 네임스페이스 ID 가져오기",
   "script.fn.math.abs": "절댓값",
   "script.fn.math.min": "더 작은 값",
   "script.fn.math.max": "더 큰 값",
@@ -521,6 +522,13 @@ export const koKr: Record<MessageKey, string> = {
   "triggerType.inventory_click": "인벤토리 클릭",
   "triggerType.inventory_open": "인벤토리 열기",
   "triggerType.inventory_close": "인벤토리 닫기",
+  "triggerType.player_interact_entity": "엔티티와 상호작용",
+  "triggerType.player_animation": "플레이어 애니메이션",
+  "triggerType.player_velocity": "속도 변경",
+  "triggerType.async_player_chat": "플레이어 채팅",
+  "triggerType.player_take_campfire": "모닥불에서 가져오기",
+  "triggerType.prepare_grindstone": "숫돌 준비",
+  "triggerType.trade_select": "거래 선택",
 
   "issue.fileNameEmpty": "조합법 파일 이름은 비워 둘 수 없습니다.",
   "issue.fileNameNeedsRecipeId":

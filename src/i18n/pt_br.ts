@@ -285,6 +285,8 @@ export const ptBr: Record<MessageKey, string> = {
   "script.fn.conditions.in_rain": "Verifica se o jogador está na chuva",
   "script.fn.conditions.light_level":
     "Lê o nível de luz do bloco onde o jogador está",
+  "script.fn.conditions.match_item_id":
+    "Obter o ID com namespace de um objeto item",
   "script.fn.math.abs": "Valor absoluto",
   "script.fn.math.min": "Menor de dois valores",
   "script.fn.math.max": "Maior de dois valores",
@@ -536,6 +538,13 @@ export const ptBr: Record<MessageKey, string> = {
   "triggerType.inventory_click": "Clique no inventário",
   "triggerType.inventory_open": "Abrir inventário",
   "triggerType.inventory_close": "Fechar inventário",
+  "triggerType.player_interact_entity": "Interagir com entidade",
+  "triggerType.player_animation": "Animação do jogador",
+  "triggerType.player_velocity": "Mudança de velocidade",
+  "triggerType.async_player_chat": "Chat do jogador",
+  "triggerType.player_take_campfire": "Pegar da fogueira",
+  "triggerType.prepare_grindstone": "Preparar rebolo",
+  "triggerType.trade_select": "Selecionar comércio",
 
   "issue.fileNameEmpty": "O nome do arquivo da receita não pode ficar vazio.",
   "issue.fileNameNeedsRecipeId":

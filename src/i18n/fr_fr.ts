@@ -285,6 +285,8 @@ export const frFr: Record<MessageKey, string> = {
   "script.fn.conditions.in_rain": "Vérifier si le joueur est sous la pluie",
   "script.fn.conditions.light_level":
     "Lire le niveau de lumière du bloc occupé",
+  "script.fn.conditions.match_item_id":
+    "Obtenir l'ID qualifié d'un objet item",
   "script.fn.math.abs": "Valeur absolue",
   "script.fn.math.min": "Plus petite valeur",
   "script.fn.math.max": "Plus grande valeur",
@@ -536,6 +538,13 @@ export const frFr: Record<MessageKey, string> = {
   "triggerType.inventory_click": "Clic dans un inventaire",
   "triggerType.inventory_open": "Ouverture d'un inventaire",
   "triggerType.inventory_close": "Fermeture d'un inventaire",
+  "triggerType.player_interact_entity": "Interaction avec entité",
+  "triggerType.player_animation": "Animation du joueur",
+  "triggerType.player_velocity": "Changement de vitesse",
+  "triggerType.async_player_chat": "Chat du joueur",
+  "triggerType.player_take_campfire": "Prendre du feu de camp",
+  "triggerType.prepare_grindstone": "Préparer la meule",
+  "triggerType.trade_select": "Sélectionner un échange",
 
   "issue.fileNameEmpty": "Le nom du fichier de recette ne peut pas être vide.",
   "issue.fileNameNeedsRecipeId":

@@ -53,6 +53,7 @@ export function createDraft(type: RecipeTypeId): RecipeDraft {
     cookingCategory: '',
     fakeResultPreview: null,
     copyComponentsRules: [],
+    resultProcessors: null,
   };
 }
 
@@ -116,6 +117,7 @@ export function changeDraftType(draft: RecipeDraft, nextType: RecipeTypeId): Rec
   next.result = draft.result;
   next.group = draft.group;
   next.recipeId = draft.recipeId;
+  next.resultProcessors = draft.resultProcessors;
   if (draft.fileName !== getRecipeType(draft.type).filePrefix) {
     next.fileName = draft.fileName;
   }

@@ -289,6 +289,8 @@ export const esEs: Record<MessageKey, string> = {
   "script.fn.conditions.in_rain": "Comprobar si el jugador está bajo la lluvia",
   "script.fn.conditions.light_level":
     "Leer el nivel de luz del bloque donde está",
+  "script.fn.conditions.match_item_id":
+    "Obtener el ID con espacio de nombres del objeto ítem",
   "script.fn.math.abs": "Valor absoluto",
   "script.fn.math.min": "El menor de dos valores",
   "script.fn.math.max": "El mayor de dos valores",
@@ -540,6 +542,13 @@ export const esEs: Record<MessageKey, string> = {
   "triggerType.inventory_click": "Clic en inventario",
   "triggerType.inventory_open": "Abrir inventario",
   "triggerType.inventory_close": "Cerrar inventario",
+  "triggerType.player_interact_entity": "Interactuar con entidad",
+  "triggerType.player_animation": "Animación de jugador",
+  "triggerType.player_velocity": "Cambio de velocidad",
+  "triggerType.async_player_chat": "Chat del jugador",
+  "triggerType.player_take_campfire": "Tomar de la hoguera",
+  "triggerType.prepare_grindstone": "Preparar muela",
+  "triggerType.trade_select": "Seleccionar comercio",
 
   "issue.fileNameEmpty":
     "El nombre del archivo de receta no puede estar vacío.",

@@ -283,6 +283,8 @@ export const jaJp: Record<MessageKey, string> = {
   "script.fn.conditions.in_rain": "プレイヤーが雨に当たっているか判定",
   "script.fn.conditions.light_level":
     "プレイヤーがいるブロックの明るさレベルを取得",
+  "script.fn.conditions.match_item_id":
+    "アイテムオブジェクトの名前空間 ID を取得",
   "script.fn.math.abs": "絶対値",
   "script.fn.math.min": "小さい方の値",
   "script.fn.math.max": "大きい方の値",
@@ -532,6 +534,13 @@ export const jaJp: Record<MessageKey, string> = {
   "triggerType.inventory_click": "インベントリのクリック",
   "triggerType.inventory_open": "インベントリを開く",
   "triggerType.inventory_close": "インベントリを閉じる",
+  "triggerType.player_interact_entity": "エンティティと交流",
+  "triggerType.player_animation": "プレイヤーアニメーション",
+  "triggerType.player_velocity": "速度変化",
+  "triggerType.async_player_chat": "チャット",
+  "triggerType.player_take_campfire": "たき火から取り出す",
+  "triggerType.prepare_grindstone": "砥石の準備",
+  "triggerType.trade_select": "取引の選択",
 
   "issue.fileNameEmpty": "レシピのファイル名は空にできません。",
   "issue.fileNameNeedsRecipeId":

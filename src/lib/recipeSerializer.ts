@@ -154,6 +154,10 @@ export function draftToConfigObject(draft: RecipeDraft): Record<string, unknown>
     config.copy_components_rules = [...draft.copyComponentsRules];
   }
 
+  if (draft.resultProcessors && Object.keys(draft.resultProcessors).length > 0) {
+    config.result_processors = draft.resultProcessors;
+  }
+
   return config;
 }
 

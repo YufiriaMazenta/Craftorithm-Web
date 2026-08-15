@@ -257,6 +257,7 @@ export const zhTw: Record<MessageKey, string> = {
   "script.fn.conditions.in_water": "判斷玩家是否在水中",
   "script.fn.conditions.in_rain": "判斷玩家是否在雨中",
   "script.fn.conditions.light_level": "取得所在方塊的亮度等級",
+  "script.fn.conditions.match_item_id": "取得物品物件的命名空間 ID",
   "script.fn.math.abs": "絕對值",
   "script.fn.math.min": "取較小值",
   "script.fn.math.max": "取較大值",
@@ -493,6 +494,13 @@ export const zhTw: Record<MessageKey, string> = {
   "triggerType.inventory_click": "點擊容器",
   "triggerType.inventory_open": "開啟容器",
   "triggerType.inventory_close": "關閉容器",
+  "triggerType.player_interact_entity": "與實體互動",
+  "triggerType.player_animation": "玩家動畫",
+  "triggerType.player_velocity": "速度變化",
+  "triggerType.async_player_chat": "玩家聊天",
+  "triggerType.player_take_campfire": "從營火取物",
+  "triggerType.prepare_grindstone": "磨石準備",
+  "triggerType.trade_select": "選擇交易",
 
   "issue.fileNameEmpty": "配方檔案名稱不能為空。",
   "issue.fileNameNeedsRecipeId":

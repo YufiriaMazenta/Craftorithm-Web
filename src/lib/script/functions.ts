@@ -8,7 +8,7 @@
  * │ 3. 补全、语法检测、悬浮说明会自动带上，不需要改别的文件。      │
  * └────────────────────────────────────────────────────────────┘
  *
- * 数据来源（保持同步，当前对齐 crypticlib common-script 1.20.2.3）：
+ * 数据来源（保持同步，当前对齐 crypticlib common-script 1.21.11.0）：
  * - core/.../script/ActionModule.java        moduleName = "actions"
  * - core/.../script/ConditionModule.java     moduleName = "conditions"
  * - hook/vault/.../VaultModule.java          moduleName = "vault"
@@ -31,7 +31,7 @@
  *   所以 craftorithm_builtin:delay(20) 运行期会抛 Unknown function。
  *   delay 是唯一一个只有短名的函数。
  *
- * 调用形式（与 crypticlib 1.20.2.3 ScriptParser 一致）：
+ * 调用形式（与 crypticlib 1.21.11.0 ScriptParser 一致）：
  * - 短名调用：level >= 10、tell("hi")、delay(20)
  * - 模块限定：math:max(1, 2)、actions:tell("hi")；模块调用**必须**带括号
  * - 方法链：x.get("name")，receiver 作为隐式首参传给 obj:get
@@ -279,6 +279,13 @@ export const SCRIPT_MODULES: ScriptModuleDef[] = [
         name: "light_level",
         params: [],
         returns: "number",
+        role: "query",
+        doc: true,
+      },
+      {
+        name: "match_item_id",
+        params: [{ name: "item", kind: "any" }],
+        returns: "string",
         role: "query",
         doc: true,
       },

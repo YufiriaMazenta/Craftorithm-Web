@@ -90,6 +90,12 @@ export interface RecipeDraft {
   cookingCategory: CookingBookCategory | '';
   fakeResultPreview: SlotValue;
   copyComponentsRules: string[];
+  /**
+   * 成品处理器（result_processors）。1.13.0.0 新增的嵌套配置，
+   * 编辑器不提供可视化编辑，原样透传：导入时保留，导出时写回 YAML。
+   * null 表示不写入此字段。
+   */
+  resultProcessors: Record<string, unknown> | null;
 }
 
 export type SlotFieldKey =
