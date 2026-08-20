@@ -549,6 +549,9 @@ export const esEs: Record<MessageKey, string> = {
   "triggerType.player_take_campfire": "Tomar de la hoguera",
   "triggerType.prepare_grindstone": "Preparar muela",
   "triggerType.trade_select": "Seleccionar comercio",
+  "triggerType.player_interact_at_entity": "Interacción precisa con entidad",
+  "triggerType.player_unleash_entity": "Soltar la correa",
+  "triggerType.player_resource_pack_status": "Estado del paquete de recursos",
 
   "issue.fileNameEmpty":
     "El nombre del archivo de receta no puede estar vacío.",

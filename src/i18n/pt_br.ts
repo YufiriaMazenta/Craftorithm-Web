@@ -545,6 +545,9 @@ export const ptBr: Record<MessageKey, string> = {
   "triggerType.player_take_campfire": "Pegar da fogueira",
   "triggerType.prepare_grindstone": "Preparar rebolo",
   "triggerType.trade_select": "Selecionar comércio",
+  "triggerType.player_interact_at_entity": "Interação precisa com entidade",
+  "triggerType.player_unleash_entity": "Soltar a corda",
+  "triggerType.player_resource_pack_status": "Status do pacote de recursos",
 
   "issue.fileNameEmpty": "O nome do arquivo da receita não pode ficar vazio.",
   "issue.fileNameNeedsRecipeId":

@@ -545,6 +545,9 @@ export const frFr: Record<MessageKey, string> = {
   "triggerType.player_take_campfire": "Prendre du feu de camp",
   "triggerType.prepare_grindstone": "Préparer la meule",
   "triggerType.trade_select": "Sélectionner un échange",
+  "triggerType.player_interact_at_entity": "Interaction précise avec une entité",
+  "triggerType.player_unleash_entity": "Détacher la laisse",
+  "triggerType.player_resource_pack_status": "État du pack de ressources",
 
   "issue.fileNameEmpty": "Le nom du fichier de recette ne peut pas être vide.",
   "issue.fileNameNeedsRecipeId":

@@ -23,6 +23,8 @@
 | 酿造                | 酿造台                             |
 | 铁砧                | 合并两个物品，可设定所需等级       |
 
+配方字段、触发器类型和脚本函数当前对应 Craftorithm 1.13.5.2。
+
 物品目录与材质来自 [mcmeta](https://github.com/misode/mcmeta)，当前对应 Minecraft 26.2。
 支持物品标签 (`#minecraft:planks` 这类) 自动展开成具体物品。
 

@@ -540,6 +540,9 @@ export const viVn: Record<MessageKey, string> = {
   "triggerType.player_take_campfire": "Lấy từ đống lửa",
   "triggerType.prepare_grindstone": "Chuẩn bị bàn mài",
   "triggerType.trade_select": "Chọn giao dịch",
+  "triggerType.player_interact_at_entity": "Tương tác chính xác với thực thể",
+  "triggerType.player_unleash_entity": "Tháo dây dắt",
+  "triggerType.player_resource_pack_status": "Trạng thái gói tài nguyên",
 
   "issue.fileNameEmpty": "Tên tệp công thức không được để trống.",
   "issue.fileNameNeedsRecipeId":

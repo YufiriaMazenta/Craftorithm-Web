@@ -501,6 +501,9 @@ export const zhTw: Record<MessageKey, string> = {
   "triggerType.player_take_campfire": "從營火取物",
   "triggerType.prepare_grindstone": "磨石準備",
   "triggerType.trade_select": "選擇交易",
+  "triggerType.player_interact_at_entity": "對實體精確互動",
+  "triggerType.player_unleash_entity": "解開繩索",
+  "triggerType.player_resource_pack_status": "資源包狀態",
 
   "issue.fileNameEmpty": "配方檔案名稱不能為空。",
   "issue.fileNameNeedsRecipeId":

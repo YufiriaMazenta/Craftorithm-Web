@@ -533,6 +533,9 @@ export const ruRu: Record<MessageKey, string> = {
   "triggerType.player_take_campfire": "Взять из костра",
   "triggerType.prepare_grindstone": "Подготовка точила",
   "triggerType.trade_select": "Выбор торговли",
+  "triggerType.player_interact_at_entity": "Точное взаимодействие с существом",
+  "triggerType.player_unleash_entity": "Отвязывание поводка",
+  "triggerType.player_resource_pack_status": "Статус ресурспака",
 
   "issue.fileNameEmpty": "Имя файла рецепта не может быть пустым.",
   "issue.fileNameNeedsRecipeId":

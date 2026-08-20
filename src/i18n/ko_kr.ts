@@ -529,6 +529,9 @@ export const koKr: Record<MessageKey, string> = {
   "triggerType.player_take_campfire": "모닥불에서 가져오기",
   "triggerType.prepare_grindstone": "숫돌 준비",
   "triggerType.trade_select": "거래 선택",
+  "triggerType.player_interact_at_entity": "엔티티 정밀 상호작용",
+  "triggerType.player_unleash_entity": "이끈 풀기",
+  "triggerType.player_resource_pack_status": "리소스 팩 상태",
 
   "issue.fileNameEmpty": "조합법 파일 이름은 비워 둘 수 없습니다.",
   "issue.fileNameNeedsRecipeId":

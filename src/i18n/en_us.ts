@@ -528,6 +528,9 @@ export const enUs: Record<MessageKey, string> = {
   "triggerType.player_take_campfire": "Take from campfire",
   "triggerType.prepare_grindstone": "Prepare Grindstone",
   "triggerType.trade_select": "Trade Select",
+  "triggerType.player_interact_at_entity": "Interact At Entity",
+  "triggerType.player_unleash_entity": "Unleash Entity",
+  "triggerType.player_resource_pack_status": "Resource Pack Status",
 
   "issue.fileNameEmpty": "The recipe file name cannot be empty.",
   "issue.fileNameNeedsRecipeId":

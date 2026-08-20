@@ -541,6 +541,9 @@ export const jaJp: Record<MessageKey, string> = {
   "triggerType.player_take_campfire": "たき火から取り出す",
   "triggerType.prepare_grindstone": "砥石の準備",
   "triggerType.trade_select": "取引の選択",
+  "triggerType.player_interact_at_entity": "エンティティへの精密操作",
+  "triggerType.player_unleash_entity": "リードを外す",
+  "triggerType.player_resource_pack_status": "リソースパックの状態",
 
   "issue.fileNameEmpty": "レシピのファイル名は空にできません。",
   "issue.fileNameNeedsRecipeId":

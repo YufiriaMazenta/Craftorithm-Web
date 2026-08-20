@@ -8,7 +8,7 @@
  * │ 3. 补全、语法检测、悬浮说明会自动带上，不需要改别的文件。      │
  * └────────────────────────────────────────────────────────────┘
  *
- * 数据来源（保持同步，当前对齐 crypticlib common-script 1.21.11.0）：
+ * 数据来源（保持同步，当前对齐 crypticlib common-script 1.21.13.1）：
  * - core/.../script/ActionModule.java        moduleName = "actions"
  * - core/.../script/ConditionModule.java     moduleName = "conditions"
  * - hook/vault/.../VaultModule.java          moduleName = "vault"
@@ -31,7 +31,12 @@
  *   所以 craftorithm_builtin:delay(20) 运行期会抛 Unknown function。
  *   delay 是唯一一个只有短名的函数。
  *
- * 调用形式（与 crypticlib 1.21.11.0 ScriptParser 一致）：
+ * Craftorithm 1.13.3.0 → 1.13.5.2 把 crypticlibVer 从 1.21.11.0 提到 1.21.13.1，
+ * 但那三个版本（1.21.12.0 / 1.21.13.0 / 1.21.13.1）在 common-script 下零文件改动
+ * （改的是 bukkit 配置类、isPaper/isFolia 缓存、toSafeTick），插件自身的
+ * registry.register 调用也一处未动，所以这份函数表与语法规则都不需要跟着改。
+ *
+ * 调用形式（与 crypticlib 1.21.13.1 ScriptParser 一致）：
  * - 短名调用：level >= 10、tell("hi")、delay(20)
  * - 模块限定：math:max(1, 2)、actions:tell("hi")；模块调用**必须**带括号
  * - 方法链：x.get("name")，receiver 作为隐式首参传给 obj:get

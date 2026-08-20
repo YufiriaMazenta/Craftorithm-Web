@@ -504,6 +504,9 @@ export const zhCn = {
   "triggerType.player_take_campfire": "从营火取物",
   "triggerType.prepare_grindstone": "磨石准备",
   "triggerType.trade_select": "选择交易",
+  "triggerType.player_interact_at_entity": "对实体精确交互",
+  "triggerType.player_unleash_entity": "解开拴绳",
+  "triggerType.player_resource_pack_status": "资源包状态",
 
   "issue.fileNameEmpty": "配方文件名不能为空。",
   "issue.fileNameNeedsRecipeId":

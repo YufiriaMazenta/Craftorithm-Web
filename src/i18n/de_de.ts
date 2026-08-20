@@ -546,6 +546,9 @@ export const deDe: Record<MessageKey, string> = {
   "triggerType.player_take_campfire": "Lagerfeuer entnehmen",
   "triggerType.prepare_grindstone": "Schleifstein vorbereiten",
   "triggerType.trade_select": "Handel auswählen",
+  "triggerType.player_interact_at_entity": "Genaue Interaktion mit Wesen",
+  "triggerType.player_unleash_entity": "Leine lösen",
+  "triggerType.player_resource_pack_status": "Status des Ressourcenpakets",
 
   "issue.fileNameEmpty": "Der Rezept-Dateiname darf nicht leer sein.",
   "issue.fileNameNeedsRecipeId":

@@ -4,7 +4,7 @@
  * 合成类触发器可以用 recipes 过滤具体配方；通用事件类不涉及配方，
  * recipes 留空即匹配全部。
  *
- * 数据来源对齐 Craftorithm 1.13.3.0 官方文档。
+ * 数据来源对齐 Craftorithm 1.13.5.2 的 CraftTriggerTypes / EventTriggerTypes 注册表。
  * 全部触发器上下文均提供 event 对象（Bukkit 事件实例），可通过
  * obj:get / obj:invoke 等方法访问；其余变量因类型不同而异。
  */
@@ -114,6 +114,14 @@ export const TRIGGER_TYPES: TriggerTypeMeta[] = [
   { id: "player_velocity", group: "player", variables: ["event"] },
   { id: "async_player_chat", group: "player", variables: ["message", "event"] },
   { id: "player_take_campfire", group: "player", variables: ["item", "event"] },
+  // 插件里一直存在，1.13.3.0 那轮同步漏收，1.13.5.2 同步时补上
+  { id: "player_interact_at_entity", group: "player", variables: ["event"] },
+  { id: "player_unleash_entity", group: "player", variables: ["event"] },
+  {
+    id: "player_resource_pack_status",
+    group: "player",
+    variables: ["status", "event"],
+  },
 
   {
     id: "damage_entity",
