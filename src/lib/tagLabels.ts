@@ -162,6 +162,11 @@ function stripNamespace(id: string): string {
  * 让「木板」能命中 planks（成员里有「橡木木板」）、「铁锭」能命中
  * iron_tool_materials。成员名取全量而不是摘要的前 3 个，否则搜
  * 「下界合金锭」找不到 beacon_payment_items。
+ *
+ * 每条文本额外补一份去掉「的」的形式：搜索是子串匹配，而中文里省掉结构
+ * 助词是很自然的输入习惯 —— 标签写「猫的食物」时搜「猫食物」、官方名是
+ * 「僵尸的头」时搜「僵尸头」，都应该命中。只去「的」不去别的字：它是纯
+ * 结构助词，删掉不会把两个不同的词并成一个。
  */
 export function tagSearchText(tag: string, t: Translate): string {
   const parts: string[] = [tag];
@@ -171,6 +176,10 @@ export function tagSearchText(tag: string, t: Translate): string {
     const short = stripNamespace(id);
     const official = officialItemName(short);
     if (official) parts.push(official);
+  }
+  for (const part of [...parts]) {
+    const compact = part.replace(/的/g, '');
+    if (compact !== part && compact !== '') parts.push(compact);
   }
   return parts.join('\n');
 }
