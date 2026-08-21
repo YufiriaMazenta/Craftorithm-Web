@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="./assets/icon-2aqik966.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Craftorithm Recipe Studio</title>
+    <script>
+      /* 在首帧前定下主题，避免深色偏好下先闪一下浅色 */
+      (function () {
+        try {
+          var saved = localStorage.getItem('craftorithm:theme');
+          var theme =
+            saved === 'dark' || saved === 'light'
+              ? saved
+              : window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light';
+          document.documentElement.dataset.theme = theme;
+        } catch (error) {
+          document.documentElement.dataset.theme = 'light';
+        }
+      })();
+    </script>
+    <script type="module" crossorigin src="./assets/index-D0bzpTuN.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-262iZMQJ.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
