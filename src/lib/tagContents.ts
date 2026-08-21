@@ -10,7 +10,7 @@
  * 懒加载：只在第一次真要显示悬浮窗时才请求。挂在 ensureCatalogLoaded 上会让
  * 每个打开选择器的人都付这 47 KB，而绝大多数人不会去 hover tag。
  */
-const GAME_VERSION = '26.2';
+const GAME_VERSION = "26.2";
 const CONTENTS_URL = `https://cdn.jsdelivr.net/gh/misode/mcmeta@${GAME_VERSION}-summary/data/tag/item/data.min.json`;
 const CACHE_KEY = `craftorithm:item-tag-contents:${GAME_VERSION}`;
 
@@ -37,17 +37,32 @@ export function tagContentsReady(): boolean {
   return contents !== null;
 }
 
+/*
+ * 通知次数计数器。
+ *
+ * 订阅本身只是个回调，useSyncExternalStore 还需要一个能比较的快照值；
+ * 依赖 tag 内容的 useMemo 也需要一个能放进依赖数组的标量。
+ * tagContentsReady() 只有 false→true 一次跳变，不足以充当版本号。
+ */
+let version = 0;
+
+/** 当前内容版本，仅用于让下游感知「内容变过了」。 */
+export function tagContentsVersion(): number {
+  return version;
+}
+
 function notify(): void {
+  version += 1;
   for (const listener of listeners) listener();
 }
 
 function normalize(raw: unknown): TagMap {
-  if (!raw || typeof raw !== 'object') return {};
+  if (!raw || typeof raw !== "object") return {};
   const result: TagMap = {};
   for (const [name, entry] of Object.entries(raw as Record<string, unknown>)) {
     const values = (entry as { values?: unknown } | null)?.values;
     if (!Array.isArray(values)) continue;
-    result[name] = values.filter((v): v is string => typeof v === 'string');
+    result[name] = values.filter((v): v is string => typeof v === "string");
   }
   return result;
 }
@@ -96,9 +111,9 @@ export function ensureTagContentsLoaded(): void {
 }
 
 function shortName(ref: string): string {
-  const withoutHash = ref.startsWith('#') ? ref.slice(1) : ref;
-  return withoutHash.startsWith('minecraft:')
-    ? withoutHash.slice('minecraft:'.length)
+  const withoutHash = ref.startsWith("#") ? ref.slice(1) : ref;
+  return withoutHash.startsWith("minecraft:")
+    ? withoutHash.slice("minecraft:".length)
     : withoutHash;
 }
 
@@ -118,11 +133,11 @@ export function resolveTagItems(tag: string): string[] {
     const values = contents?.[name];
     if (!values) return;
     for (const value of values) {
-      if (value.startsWith('#')) {
+      if (value.startsWith("#")) {
         walk(shortName(value));
         continue;
       }
-      const id = value.includes(':') ? value : `minecraft:${value}`;
+      const id = value.includes(":") ? value : `minecraft:${value}`;
       if (seen.has(id)) continue;
       seen.add(id);
       out.push(id);

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { ITEM_CATEGORIES, type ItemCategoryId } from '../data/vanillaItems';
 import { getItemTexture } from '../lib/itemTextures';
 import { useCatalog } from '../lib/useCatalog';
@@ -6,11 +6,17 @@ import { useItemNames } from '../lib/useItemNames';
 import { rememberRecentItem, searchItems, type SearchResultItem } from '../lib/itemLookup';
 import { clampAmount, makeItem, makePack, makeTag, MAX_AMOUNT, normalizeItemId, parseChoice } from '../lib/choice';
 import { CATALOG_GAME_VERSION } from '../lib/itemCatalog';
-import { cachedTagItems, ensureTagContentsLoaded, subscribeTagContents } from '../lib/tagContents';
+import {
+  cachedTagItems,
+  ensureTagContentsLoaded,
+  subscribeTagContents,
+  tagContentsVersion,
+} from '../lib/tagContents';
+import { tagLabel, tagSearchText, tagSummary, tagWikiUrl } from '../lib/tagLabels';
 import { ItemHoverPreview, type HoverPreviewState } from './ItemHoverPreview';
 import { originStyle, type PickerOrigin } from '../lib/pickerOrigin';
 import { useI18n } from '../i18n';
-import type { MessageKey, Translate } from '../i18n';
+import type { Locale, MessageKey, Translate } from '../i18n';
 import type { ItemPack, SlotValue } from '../types/recipe';
 
 type PickerTab = 'item' | 'tag' | 'item_pack';
@@ -57,9 +63,19 @@ export function ItemPicker({
   onCommit,
   onClose,
 }: ItemPickerProps) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const catalog = useCatalog();
   const names = useItemNames();
+  /*
+   * 标签内容到货后要重筛搜索结果、重算成员摘要。
+   * 订阅放在这一层而不是 TagResults 里：搜索的 useMemo 在这里，
+   * 拿不到版本号就会一直用「内容还没到」时算出的空结果。
+   */
+  const contentsVersion = useSyncExternalStore(
+    subscribeTagContents,
+    tagContentsVersion,
+    tagContentsVersion,
+  );
   const [tab, setTab] = useState<PickerTab>(() => (value && allowGroups ? value.kind : 'item'));
   const [query, setQuery] = useState('');
   /*
@@ -156,11 +172,25 @@ export function ItemPicker({
     [tab, activeQuery, category, catalog.status, catalog.items.length, names.ready],
   );
 
+  /*
+   * 标签搜索同时匹配裸 ID、白话文名和成员的本地化物品名，
+   * 这样搜「木板」能找到 planks、搜「铁锭」能找到 iron_tool_materials，
+   * 不必先记住英文 ID。
+   *
+   * 依赖里带上 names.ready 与 tagContentsVersion：官方名或标签内容到货后
+   * 可匹配的文本会变多，得重新筛一遍。
+   */
   const tagResults = useMemo(() => {
     if (tab !== 'tag') return [];
-    const needle = activeQuery.trim().toLowerCase();
-    return needle ? catalog.tags.filter((tag) => tag.includes(needle)) : catalog.tags;
-  }, [tab, activeQuery, catalog.tags]);
+    const raw = activeQuery.trim();
+    if (!raw) return catalog.tags;
+    const needle = raw.toLowerCase();
+    return catalog.tags.filter((tag) => {
+      const haystack = tagSearchText(tag, t);
+      // 非拉丁名不做小写化，按原文匹配；拉丁名走小写比较
+      return haystack.includes(raw) || haystack.toLowerCase().includes(needle);
+    });
+  }, [tab, activeQuery, catalog.tags, t, names.ready, contentsVersion]);
 
   const packResults = useMemo(() => {
     if (tab !== 'item_pack') return [];
@@ -346,6 +376,7 @@ export function ItemPicker({
               onPick={commitTag}
               onHover={setHoverPreview}
               t={t}
+              locale={locale}
             />
           ) : null}
 
@@ -465,6 +496,7 @@ function TagResults({
   onPick,
   onHover,
   t,
+  locale,
 }: {
   tags: string[];
   status: string;
@@ -473,6 +505,7 @@ function TagResults({
   onPick: (tag: string) => void;
   onHover: (state: HoverPreviewState | null) => void;
   t: Translate;
+  locale: Locale;
 }) {
   /* tag 内容是懒加载的，进到这个页签才开始拉；到货后重渲染一次让悬浮窗能取到 */
   const [, bump] = useState(0);
@@ -489,10 +522,13 @@ function TagResults({
   }
   return (
     <>
-    <div className="picker-grid">
-      {tags.slice(0, visibleCount).map((tag) => (
+    <div className="picker-grid picker-grid-tag">
+      {tags.slice(0, visibleCount).map((tag) => {
+        const label = tagLabel(tag, t);
+        const summary = tagSummary(tag, t);
+        return (
+        <div className="picker-item-row" key={tag}>
         <button
-          key={tag}
           type="button"
           className="picker-item"
           onClick={() => onPick(tag)}
@@ -509,11 +545,32 @@ function TagResults({
             <span className="picker-item-glyph">#</span>
           </span>
           <span className="picker-item-text">
-            <span className="picker-item-name">{tag}</span>
+            {/*
+              有白话文名时它当主标题、tag ID 退到第二行；没有（第三方 tag）
+              就还是 ID 当主标题，不留空行。
+            */}
+            <span className="picker-item-name">{label ?? tag}</span>
             <span className="picker-item-id">tag:{tag}</span>
+            {summary ? <span className="picker-item-summary">{summary}</span> : null}
           </span>
         </button>
-      ))}
+        {/*
+          Wiki 兜底入口。放在按钮外面：嵌套在 button 里的 a 不是合法结构，
+          点链接也会连带触发选择。
+        */}
+        <a
+          className="picker-item-wiki"
+          href={tagWikiUrl(tag, locale)}
+          target="_blank"
+          rel="noreferrer noopener"
+          title={t('picker.tagWiki', { name: tag })}
+          aria-label={t('picker.tagWiki', { name: tag })}
+        >
+          ?
+        </a>
+        </div>
+        );
+      })}
     </div>
     <ShowMore total={tags.length} visibleCount={visibleCount} onShowMore={onShowMore} t={t} />
     </>

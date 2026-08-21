@@ -1203,6 +1203,14 @@
   gap: 6px;
 }
 
+/*
+ * 标签条目比物品多一行成员摘要，还多一个 Wiki 链接，120px 会把三行全省略成「…」。
+ * 只放宽标签页签，物品与物品组仍用密排。
+ */
+.picker-grid-tag {
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
 .picker-item {
   display: flex;
   align-items: center;
@@ -1262,6 +1270,71 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/*
+ * 标签条目：按钮 + 右侧 Wiki 链接并排。
+ *
+ * 链接不能放进按钮里（button 里嵌 a 不是合法结构，且点链接会连带触发选择），
+ * 所以外面套一层 row 承载这两个兄弟元素。
+ */
+.picker-item-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+/* 按钮吃掉行内剩余宽度，Wiki 链接保持固定尺寸 */
+.picker-item-row .picker-item {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 成员摘要：比 ID 再弱一级，只作辅助识别 */
+.picker-item-summary {
+  display: block;
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.picker-item-wiki {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--text-muted);
+  text-decoration: none;
+  /* 默认收着，hover 整行或聚焦时才明显，避免 224 行里塞满蓝色链接 */
+  opacity: 0;
+}
+
+.picker-item-row:hover .picker-item-wiki,
+.picker-item-wiki:focus-visible {
+  opacity: 1;
+}
+
+.picker-item-wiki:hover {
+  background: var(--teal-wash);
+  color: var(--teal);
+}
+
+/*
+ * 触屏没有 hover，链接会一直不可见。有粗指针时常驻显示。
+ */
+@media (hover: none) {
+  .picker-item-wiki {
+    opacity: 1;
+  }
 }
 
 .picker-foot {
